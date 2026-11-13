@@ -16,6 +16,7 @@ import { JOGO as J, CONFIG_VERSAO } from './jogo-dados.js';
 import * as L from './logica.js';
 import { NARRACAO, LEGENDA } from './narracao.js';
 import { CONFIG } from './conteudo.js';
+import { tab, criarTabuleiro, posicionar, andar, virarCarta } from './tabuleiro.js';
 
 const params = new URLSearchParams(location.search);
 const ESTACAO = params.get('estacao') ? `Estação ${params.get('estacao')}` : CONFIG.estacaoPadrao;
@@ -102,7 +103,8 @@ function falar(chaves, fim) {
     const k = lista[i];
     const texto = LEGENDA[k] || NARRACAO[k] || '';
     const dur = duracaoFala(k) || Math.max(2, texto.split(/\s+/).length / 2.6);
-    mostrarLegenda(texto, dur + 0.3);
+    // perguntas e treino já aparecem escritos no painel: sem legenda duplicada sobre as opções e o tabuleiro
+    if (!/^Q\d$/.test(k) && k !== 'treino') mostrarLegenda(texto, dur + 0.3);
     // segue quando a fala termina; se o áudio travar (contexto suspenso), segue pelo tempo estimado
     let feito = false;
     const avancar = () => { if (!feito) { feito = true; proximo(i + 1); } };
@@ -263,13 +265,13 @@ function atualizarHud(animar = true) {
 // ============================================================ ferramentas ===
 // Console baixo: pausar, recalibrar e sair (o roteiro pede os três sempre à mão)
 const consoleG = new THREE.Group();
-consoleG.position.set(0, 0.7, -1.75);
-consoleG.rotation.x = -0.35;
+consoleG.position.set(-1.25, 0.9, -0.75);   // ao lado do tabuleiro, fora do arco das opções
+consoleG.rotation.y = 1.0;
 FRENTE.add(consoleG);
 const bPausa = botao(0.38, 0.12, '❚❚ Pausar', () => pausar());
 const bRecal = botao(0.42, 0.12, '⟳ Recalibrar', () => recalibrar());
 const bSair = botao(0.34, 0.12, '✕ Sair', () => pedirSaida());
-bPausa.position.x = -0.46; bSair.position.x = 0.44;
+bPausa.position.y = 0.16; bSair.position.y = -0.16;
 consoleG.add(bPausa, bRecal, bSair);
 consoleG.visible = false;
 
@@ -411,11 +413,11 @@ function criarAlternativa(g, alt, angulo, aoSelecionar) {
     while (tam > 4.2 && rich(ctx, alt.texto, 0, 0, W - 12, tam, { font: F_HEAD, weight: 700, lh: 1.16, dry: true }) > H - 8) tam -= 0.3;
     rich(ctx, alt.texto, 6, H / 2, W - 12, tam, { font: F_HEAD, weight: 700, align: 'center', valign: 'middle', lh: 1.16 });
   }, { sel: false }, () => selecionar());
-  c.position.y = 1.08;
+  c.position.y = 1.22;
   grp.add(c);
   const obj = (OBJETOS[alt.objeto] || OBJETOS.alvo)();
   const holder = new THREE.Group();
-  holder.position.set(0, 1.44, 0.02);
+  holder.position.set(0, 1.58, 0.02);
   holder.scale.setScalar(1.6);
   holder.add(obj);
   grp.add(holder);
@@ -424,7 +426,7 @@ function criarAlternativa(g, alt, angulo, aoSelecionar) {
   clicavel(alvoObj, () => selecionar());
   alvoObj.userData.hoverFn = h => { holder.scale.setScalar(1.6 * (1 + 0.15 * Math.min(h, 1))); };
   const brilho = glow(0.5, ORG, 0.25); brilho.position.copy(holder.position); grp.add(brilho);
-  addUpdater(g, (t, dt) => { obj.rotation.y += dt * (c.userData.mesh.userData.state.sel ? 2 : 0.6); holder.position.y = 1.44 + Math.sin(t * 1.5 + angulo) * 0.015; });
+  addUpdater(g, (t, dt) => { obj.rotation.y += dt * (c.userData.mesh.userData.state.sel ? 2 : 0.6); holder.position.y = 1.58 + Math.sin(t * 1.5 + angulo) * 0.015; });
   reveal(grp, { delay: 0.25 + (angulo + 45) / 90 * 0.3, owner: g });
   function selecionar() {
     if (pausado) return;
@@ -454,7 +456,7 @@ function mostrarPergunta(i) {
       eyebrow(ctx, `Decisão ${i + 1} de 8 · ${J.fases[faseIdx].nome}`, 0, 0, W, { align: 'center' });
       rich(ctx, q.texto, 0, 10, W, 8.6, { font: F_HEAD, weight: 700, align: 'center', lh: 1.15 });
     });
-    place(p, 0, 1.92, 2.35); g.add(p); reveal(p, { owner: g });
+    place(p, 0, 2.0, 2.35); g.add(p); reveal(p, { owner: g });
     q.alternativas.forEach((a, k) => criarAlternativa(g, a, ANG[k], (alt, grp) => pedirConfirmacao(g, q, alt)));
   });
   falar(q.id);
@@ -509,11 +511,21 @@ function textoMovimento(n) {
 }
 function feedback(q, alt, delta) {
   etapa = 'feedback';
-  atualizarHud(true);
-  sfx(alt.casas >= 3 ? 'sucesso' : 'chamado', camera.getWorldPosition(v3));
   const melhores = L.melhores(q.id);
   const aprendizado = melhores.some(m => m.id === alt.id) ? null
     : J.interface.aprendizado.replace('{alternativa}', melhores.map(m => m.texto).join('” ou “'));
+  // o peão anda pelo tabuleiro antes do texto aparecer
+  trocar(g => {
+    const aviso = painelTexto(1.0, 0.16, (ctx, W, H) => pill(ctx, W, H, textoMovimento(alt.casas), { primary: true, size: 8 }));
+    place(aviso, 0, 1.42, 1.9); g.add(aviso); reveal(aviso, { owner: g, dy: 0.05 });
+  });
+  guia.alvo(tab.peao);
+  atualizarHud(true);
+  andarAte(s.current_house).then(() => mostrarFeedback(q, alt, aprendizado));
+}
+function mostrarFeedback(q, alt, aprendizado) {
+  if (etapa !== 'feedback') return;
+  sfx(alt.casas >= 3 ? 'sucesso' : 'chamado', camera.getWorldPosition(v3));
   trocar(g => {
     const p = painelTexto(1.9, 0.76, (ctx, W, H) => {
       cardBg(ctx, W, H, { r: 7, accent: alt.casas >= 3 ? COL.yellow : COL.orange, strong: true });
@@ -535,6 +547,23 @@ function depoisDoFeedback(q) {
   if (q.id === 'Q6') return evento();
   if (q.id === 'Q8') { etapa = 'transicao'; trocar(() => {}); return falar('trans_Q8', () => resultado()); }
   seguir();
+}
+
+// --- tabuleiro ------------------------------------------------------------------
+// Anda até a casa indicada, mostrando o faturamento quando o peão entra numa faixa nova.
+function andarAte(casa) {
+  return andar(tab.casa, casa, { aoCruzarFaixa: (n, pos) => balaoFaixa(n, pos) });
+}
+function balaoFaixa(n, posMundo) {
+  const t = `${L.receita(n).texto}/mês`;
+  const b = panel(0.5, 0.11, (ctx, W, H) => pill(ctx, W, H, t, { primary: true, size: 6.4 }));
+  b.material.depthTest = false;
+  b.renderOrder = 35;
+  const local = FRENTE.worldToLocal(posMundo.clone());
+  b.position.set(local.x, local.y + 0.22, local.z + 0.05);
+  FRENTE.add(b);
+  sfx('guia', posMundo);
+  tw(1.8, k => { b.position.y = local.y + 0.22 + 0.25 * k; op(b, k < 0.75 ? 1 : 1 - (k - 0.75) / 0.25); }, { ease: E.out, done: () => kill(b) });
 }
 
 // --- carta surpresa ---------------------------------------------------------------
@@ -563,7 +592,6 @@ function evento() {
       const delta = L.aplicarEvento(s);
       salvar();
       registrar('event_shown', { event_type: tipo, casa: s.current_house });
-      atualizarHud(true);
       const dir = painelTexto(1.0, 0.66, (ctx, W, H) => {
         cardBg(ctx, W, H, { r: 6, accent: delta >= 0 ? COL.yellow : COL.orange, strong: true });
         rich(ctx, EV.titulo, 8, 8, W - 16, 7.4, { font: F_HEAD, weight: 700, lh: 1.12 });
@@ -571,12 +599,21 @@ function evento() {
         ctx.fillText(textoMovimento(J.evento[tipo].casas), 8, 27);
         rich(ctx, EV.texto, 8, 40, W - 16, 4.3, { color: COL.text, lh: 1.35 });
       });
-      place(dir, 38, 1.62, 2.1); g.add(dir); reveal(dir, { owner: g, delay: 0.3 });
-      sfx(delta >= 0 ? 'sucesso' : 'soltar', dir.getWorldPosition(v3));
-      guia.alvo(dir);
-      falar(tipo, () => {
-        if (tipo === 'EV1') return recuperacao(g, dir);
-        botaoContinuarEvento(g);
+      place(dir, 38, 1.62, 2.1); g.add(dir);
+      dir.visible = false;
+      g.updateMatrixWorld(true);
+      // a carta sai do baralho no tabuleiro, vira e vira o painel da direita
+      virarCarta(dir.getWorldPosition(new THREE.Vector3())).then(() => {
+        dir.visible = true;
+        reveal(dir, { owner: g });
+        sfx(delta >= 0 ? 'sucesso' : 'soltar', dir.getWorldPosition(v3));
+        guia.alvo(tab.peao);
+        atualizarHud(true);
+        andarAte(s.current_house).then(() => guia.alvo(dir));
+        falar(tipo, () => {
+          if (tipo === 'EV1') return recuperacao(g, dir);
+          botaoContinuarEvento(g);
+        });
       });
     });
   });
@@ -617,6 +654,7 @@ function recuperacao(g) {
     salvar();
     registrar('recovery_selected', { choice: ativar ? 'ativar' : 'seguir', casa: s.current_house });
     atualizarHud(true);
+    andarAte(s.current_house);
     leave(bA, 0.2); leave(bS, 0.2);
     const msg = painelTexto(0.95, 0.16, (ctx, W, H) => rich(ctx, ativar ? R.aoAtivar : R.aoSeguir, 0, H / 2, W, 4.4, { align: 'center', valign: 'middle', lh: 1.3 }));
     msg.position.y = 0.92; obj.add(msg); reveal(msg);
@@ -862,6 +900,7 @@ function reiniciar() {
   resetarFases();
   setLuz(0);
   mostrarFase(0, false);
+  posicionar(0);
   telaInicial();
   tocou();
 }
@@ -890,6 +929,7 @@ function abrirCenario() {
     const f = J.fases.findIndex(x => x.id === (J.perguntas[Math.min(7, s.question_index)] || {}).fase);
     for (let i = 0; i <= Math.max(0, s.question_index >= 6 && !L.eventoResolvido(s) ? 2 : f); i++) mostrarFase(i, false);
     atualizarHud(false);
+    posicionar(s.current_house);
     if (s.event_applied && s.event_type === 'EV1' && !s.recovery_choice) { etapa = 'evento'; trocar(g => recuperacao(g)); }
     else seguir();
   } else reiniciar();
@@ -988,6 +1028,7 @@ async function boot() {
   await Promise.race([Promise.all(fontes.map(f => document.fonts.load(f))).catch(() => {}), new Promise(r => setTimeout(r, 2500))]);
   await carregarLogo();
   criarDecor();
+  criarTabuleiro(FRENTE);
   criarGuia();
   renderer.setAnimationLoop(frame);
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
