@@ -71,8 +71,9 @@ export function criarTabuleiro(parent) {
     }
   }
   // arco de luz na chegada (casa 32)
-  const arco = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.04, 12, 64, Math.PI), new THREE.MeshBasicMaterial({ color: YEL, transparent: true, opacity: 0.85, toneMapped: false }));
-  arco.position.set(0, 0, zCasa(N) - 0.5);
+  // o arco fica acima da cabeça de quem chega à casa 32 (passa por baixo dele)
+  const arco = new THREE.Mesh(new THREE.TorusGeometry(2.3, 0.03, 12, 64, Math.PI), new THREE.MeshBasicMaterial({ color: YEL, transparent: true, opacity: 0.7, toneMapped: false }));
+  arco.position.set(0, 0, zCasa(N) + 0.6);
   g.add(arco);
   const brilho = glow(3.5, YEL, 0.35); brilho.position.set(0, 1.4, zCasa(N) - 0.6); g.add(brilho);
   // marcador da casa de destino (para onde a luz-guia aponta)

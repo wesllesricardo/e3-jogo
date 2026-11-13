@@ -282,7 +282,7 @@ function trocar(fn) {
   FRENTE.add(palco);
   fn(palco);
 }
-function painelTexto(w, h, desenho) { return panel(w, h, desenho); }
+function painelTexto(w, h, desenho, estado) { return panel(w, h, desenho, estado); }
 
 // --- tela inicial --------------------------------------------------------------
 function telaInicial() {
