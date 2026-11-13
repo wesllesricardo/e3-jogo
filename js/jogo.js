@@ -549,8 +549,8 @@ function depoisDoFeedback(q) {
   seguir();
 }
 
-// --- tabuleiro ------------------------------------------------------------------
-// Anda até a casa indicada, mostrando o faturamento quando o peão entra numa faixa nova.
+// --- caminho (o jogador é o peão) -------------------------------------------------
+// Avança até a casa indicada, mostrando o faturamento quando o peão entra numa faixa nova.
 function andarAte(casa) {
   return andar(tab.casa, casa, { aoCruzarFaixa: (n, pos) => balaoFaixa(n, pos) });
 }
@@ -559,11 +559,11 @@ function balaoFaixa(n, posMundo) {
   const b = panel(0.5, 0.11, (ctx, W, H) => pill(ctx, W, H, t, { primary: true, size: 6.4 }));
   b.material.depthTest = false;
   b.renderOrder = 35;
-  const local = FRENTE.worldToLocal(posMundo.clone());
-  b.position.set(local.x, local.y + 0.22, local.z + 0.05);
+  // sempre à frente, em distância confortável de leitura (a casa pode estar aos pés do jogador)
+  b.position.set(0, 1.12, -2.3);
   FRENTE.add(b);
   sfx('guia', posMundo);
-  tw(1.8, k => { b.position.y = local.y + 0.22 + 0.25 * k; op(b, k < 0.75 ? 1 : 1 - (k - 0.75) / 0.25); }, { ease: E.out, done: () => kill(b) });
+  tw(1.8, k => { b.position.y = 1.12 + 0.2 * k; op(b, k < 0.75 ? 1 : 1 - (k - 0.75) / 0.25); }, { ease: E.out, done: () => kill(b) });
 }
 
 // --- carta surpresa ---------------------------------------------------------------
@@ -1029,6 +1029,11 @@ async function boot() {
   await carregarLogo();
   criarDecor();
   criarTabuleiro(FRENTE);
+  // o escritório escuro fica ao lado da casa de início e vai ficando para trás conforme ele avança
+  tab.caminho.add(frio);
+  frio.position.set(-2.3, 0, 2.6);
+  frio.rotation.y = 0.45;
+  frio.add(decor[0]);
   criarGuia();
   renderer.setAnimationLoop(frame);
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
