@@ -1,0 +1,22 @@
+{
+  "jogo_intro": {
+    "hash": "57eb6f70a3d6",
+    "dur": 15.42
+  },
+  "jogo_roleta": {
+    "hash": "f488405e40fe",
+    "dur": 3.24
+  },
+  "jogo_decisao": {
+    "hash": "e31e4c2bbab7",
+    "dur": 4.1
+  },
+  "jogo_meio": {
+    "hash": "bbd3b35a22a4",
+    "dur": 4.42
+  },
+  "jogo_fim": {
+    "hash": "bc4c13cfb069",
+    "dur": 7.27
+  }
+}
