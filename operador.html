@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel do operador · Jogo do Crescimento E3</title>
+<link rel="icon" href="media/logo-e3.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0D0900; --card:#17120d; --line:rgba(255,255,255,.1); --orange:#FF5F1F; --yellow:#FFEC00; --text:#ECECEC; --mute:#A9A39C; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 "Plus Jakarta Sans", system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  main { max-width:960px; margin:0 auto; padding:28px 16px 60px; }
+  .eyebrow { font-size:12px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--orange); }
+  h1 { font:800 clamp(26px,5vw,36px)/1.1 "Archivo", sans-serif; margin:6px 0 8px; }
+  h2 { font:700 20px/1.2 "Archivo", sans-serif; margin:30px 0 10px; }
+  p { color:var(--mute); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px; }
+  .kpi { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
+  .kpi small { display:block; color:var(--mute); font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  .kpi b { font:800 28px/1.2 "Archivo", sans-serif; font-variant-numeric:tabular-nums; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  th, td { padding:9px 12px; border-bottom:1px solid var(--line); text-align:left; font-size:14px; font-variant-numeric:tabular-nums; }
+  th { color:var(--mute); font-weight:600; }
+  tr:last-child td { border-bottom:0; }
+  .barra { height:8px; border-radius:4px; background:var(--orange); }
+  .acoes { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  button { font:inherit; font-weight:700; border-radius:999px; padding:11px 18px; cursor:pointer; }
+  .pri { background:var(--yellow); color:#0D0900; border:0; }
+  .sec { background:transparent; color:var(--text); border:1px solid rgba(255,95,31,.7); }
+  button:focus-visible { outline:2px solid var(--yellow); outline-offset:3px; }
+  a { color:var(--orange); }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Jogo do Crescimento E3</div>
+  <h1>Painel do operador</h1>
+  <p>Métricas anônimas salvas <strong>neste aparelho</strong> (abra esta página no navegador do próprio Quest). Nenhum dado pessoal é registrado.</p>
+
+  <div class="grid" id="kpis"></div>
+
+  <h2>Abandono por pergunta</h2>
+  <table><thead><tr><th>Etapa</th><th>Sessões que pararam aqui</th><th></th></tr></thead><tbody id="abandono"></tbody></table>
+
+  <h2>Distribuição dos finais</h2>
+  <table><thead><tr><th>Final</th><th>Sessões</th><th></th></tr></thead><tbody id="finais"></tbody></table>
+
+  <h2>Escolhas mais comuns</h2>
+  <table><thead><tr><th>Pergunta</th><th>Alternativa mais escolhida</th><th>Vezes</th></tr></thead><tbody id="escolhas"></tbody></table>
+
+  <div class="acoes">
+    <button class="pri" id="csv">Baixar eventos (CSV)</button>
+    <button class="sec" id="limpar">Apagar métricas deste aparelho</button>
+  </div>
+  <p style="margin-top:22px"><a href="index.html">← Voltar para o jogo</a></p>
+</main>
+<script type="module">
+  import { JOGO as J } from './js/jogo-dados.js';
+  const ev = JSON.parse(localStorage.getItem('e3jogo-metricas') || '[]');
+  const porSessao = {};
+  for (const e of ev) { if (!e.session_id) continue; (porSessao[e.session_id] ||= []).push(e); }
+  const sessoes = Object.values(porSessao);
+  const tem = (l, n) => l.some(e => e.ev === n);
+  const iniciadas = sessoes.filter(l => tem(l, 'session_started'));
+  const concluidas = sessoes.filter(l => tem(l, 'result_shown'));
+  const cta = sessoes.filter(l => tem(l, 'cta_selected'));
+  const dur = concluidas.map(l => (new Date(l.find(e => e.ev === 'result_shown').t) - new Date(l[0].t)) / 1000).sort((a, b) => a - b);
+  const mediana = dur.length ? dur[Math.floor(dur.length / 2)] : 0;
+  const fmt = s => `${Math.floor(s / 60)} min ${String(Math.round(s % 60)).padStart(2, '0')} s`;
+  const kpis = [['Sessões iniciadas', iniciadas.length], ['Concluídas', concluidas.length],
+    ['Taxa de conclusão', iniciadas.length ? Math.round(concluidas.length / iniciadas.length * 100) + '%' : '—'],
+    ['Duração mediana', dur.length ? fmt(mediana) : '—'], ['Pediram conversa (CTA)', cta.length],
+    ['CTA / concluídas', concluidas.length ? Math.round(cta.length / concluidas.length * 100) + '%' : '—']];
+  document.getElementById('kpis').innerHTML = kpis.map(([k, v]) => `<div class="kpi"><small>${k}</small><b>${v}</b></div>`).join('');
+  const linha = (a, b, max) => `<tr><td>${a}</td><td>${b}</td><td style="width:40%"><div class="barra" style="width:${max ? b / max * 100 : 0}%"></div></td></tr>`;
+  // abandono: última pergunta confirmada das sessões não concluídas
+  const ab = {};
+  for (const l of iniciadas.filter(l => !tem(l, 'result_shown'))) {
+    const n = l.filter(e => e.ev === 'answer_confirmed').length;
+    const etapa = !tem(l, 'tutorial_completed') ? 'Antes do treino' : n >= 8 ? 'Resultado' : `Decisão ${n + 1}`;
+    ab[etapa] = (ab[etapa] || 0) + 1;
+  }
+  const abMax = Math.max(0, ...Object.values(ab));
+  document.getElementById('abandono').innerHTML = Object.entries(ab).map(([k, v]) => linha(k, v, abMax)).join('') || '<tr><td colspan="3">Nenhum abandono registrado.</td></tr>';
+  const fin = {};
+  for (const l of concluidas) { const f = l.find(e => e.ev === 'result_shown').final; fin[f] = (fin[f] || 0) + 1; }
+  const fMax = Math.max(0, ...Object.values(fin));
+  document.getElementById('finais').innerHTML = ['R1', 'R2', 'R3', 'R4', 'R5', 'R6'].map(f => linha(`${f} · ${J.finais[f].titulo}`, fin[f] || 0, fMax)).join('');
+  const esc = {};
+  for (const e of ev.filter(e => e.ev === 'answer_confirmed')) { (esc[e.question_id] ||= {})[e.answer_id] = (esc[e.question_id][e.answer_id] || 0) + 1; }
+  document.getElementById('escolhas').innerHTML = J.perguntas.map(q => {
+    const m = Object.entries(esc[q.id] || {}).sort((a, b) => b[1] - a[1])[0];
+    const alt = m && q.alternativas.find(a => a.id === m[0]);
+    return `<tr><td>${q.id}</td><td>${alt ? alt.texto : '—'}</td><td>${m ? m[1] : 0}</td></tr>`;
+  }).join('');
+  document.getElementById('csv').addEventListener('click', () => {
+    const cols = ['t', 'ev', 'session_id', 'estacao', 'config', 'question_id', 'answer_id', 'casa', 'event_type', 'choice', 'final', 'valor', 'motivo', 'question_index'];
+    const esc2 = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const csv = [cols.join(','), ...ev.map(e => cols.map(c => esc2(e[c])).join(','))].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = `metricas-jogo-e3-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+  });
+  document.getElementById('limpar').addEventListener('click', () => {
+    if (confirm('Apagar todas as métricas salvas neste aparelho? Isso não pode ser desfeito.')) { localStorage.removeItem('e3jogo-metricas'); location.reload(); }
+  });
+</script>
+</body>
+</html>

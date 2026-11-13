@@ -1,22 +1,226 @@
 {
-  "jogo_intro": {
-    "hash": "57eb6f70a3d6",
-    "dur": 15.42
+  "abertura": {
+    "hash": "d3ae5e4ab60b",
+    "dur": 13.03
   },
-  "jogo_roleta": {
-    "hash": "f488405e40fe",
-    "dur": 3.24
+  "treino": {
+    "hash": "0d8485a0c82b",
+    "dur": 7.08
   },
-  "jogo_decisao": {
-    "hash": "e31e4c2bbab7",
-    "dur": 4.1
+  "treino_ok": {
+    "hash": "a7981548ca18",
+    "dur": 2.6
   },
-  "jogo_meio": {
-    "hash": "bbd3b35a22a4",
-    "dur": 4.42
+  "Q1": {
+    "hash": "2cc1d31a41e9",
+    "dur": 4.29
   },
-  "jogo_fim": {
-    "hash": "bc4c13cfb069",
-    "dur": 7.27
+  "Q2": {
+    "hash": "9effe0fc187a",
+    "dur": 4.22
+  },
+  "Q3": {
+    "hash": "cb734309f165",
+    "dur": 5.44
+  },
+  "Q4": {
+    "hash": "24acae2787cd",
+    "dur": 5.59
+  },
+  "Q5": {
+    "hash": "f4531c47ab1e",
+    "dur": 4.99
+  },
+  "Q6": {
+    "hash": "1767ba79df3a",
+    "dur": 6.36
+  },
+  "Q7": {
+    "hash": "a19ad5081f5b",
+    "dur": 4.35
+  },
+  "Q8": {
+    "hash": "31d1769cbe92",
+    "dur": 4.03
+  },
+  "trans_Q2": {
+    "hash": "4277087da37f",
+    "dur": 4.76
+  },
+  "trans_Q4": {
+    "hash": "17262d3e734d",
+    "dur": 6.78
+  },
+  "trans_evento": {
+    "hash": "d039ad3bd8e0",
+    "dur": 5.76
+  },
+  "trans_Q8": {
+    "hash": "56e5c981cce0",
+    "dur": 4.05
+  },
+  "evento_abertura": {
+    "hash": "4380fd4ae4f2",
+    "dur": 10.39
+  },
+  "EV1": {
+    "hash": "a70538dfe41a",
+    "dur": 9.62
+  },
+  "EV1_rec": {
+    "hash": "d77cc9ce3a19",
+    "dur": 9.96
+  },
+  "EV1_ativar": {
+    "hash": "04eb6b7c8899",
+    "dur": 4.74
+  },
+  "EV1_seguir": {
+    "hash": "070ed24b1b63",
+    "dur": 5.16
+  },
+  "EV2": {
+    "hash": "3f34c847c6c8",
+    "dur": 13.78
+  },
+  "EV3": {
+    "hash": "e6d697b676f2",
+    "dur": 9.94
+  },
+  "tit_R1": {
+    "hash": "e543d9f5ea3b",
+    "dur": 2.13
+  },
+  "tit_R2": {
+    "hash": "888e82336731",
+    "dur": 3.09
+  },
+  "tit_R3": {
+    "hash": "dc4cb7f61c93",
+    "dur": 1.81
+  },
+  "tit_R4": {
+    "hash": "6f1fad2240f9",
+    "dur": 2.86
+  },
+  "tit_R5": {
+    "hash": "7d451f21b553",
+    "dur": 3.09
+  },
+  "tit_R6": {
+    "hash": "d82d496d1f0b",
+    "dur": 3.03
+  },
+  "parabens": {
+    "hash": "8a9a649134fb",
+    "dur": 0.9
+  },
+  "val_0": {
+    "hash": "738af873111d",
+    "dur": 2.45
+  },
+  "val_10": {
+    "hash": "d836e2c039d4",
+    "dur": 2.62
+  },
+  "val_30": {
+    "hash": "ef5d94bfe257",
+    "dur": 2.69
+  },
+  "val_70": {
+    "hash": "8301175187f4",
+    "dur": 2.82
+  },
+  "val_150": {
+    "hash": "d0000d9b0192",
+    "dur": 3.33
+  },
+  "val_300": {
+    "hash": "3371965f2f64",
+    "dur": 2.9
+  },
+  "val_500": {
+    "hash": "3a62e3b7794a",
+    "dur": 2.77
+  },
+  "val_700": {
+    "hash": "2ac372ff8322",
+    "dur": 2.99
+  },
+  "val_850": {
+    "hash": "9a9684f54c2f",
+    "dur": 3.67
+  },
+  "corpo_R1": {
+    "hash": "734180be6fe3",
+    "dur": 8.13
+  },
+  "corpo_R2": {
+    "hash": "b772d36062c6",
+    "dur": 6.55
+  },
+  "corpo_R3": {
+    "hash": "92131715b63b",
+    "dur": 6.36
+  },
+  "corpo_R4": {
+    "hash": "e3105b2bbbb2",
+    "dur": 11.35
+  },
+  "corpo_R5": {
+    "hash": "41950b5f5ec3",
+    "dur": 12.99
+  },
+  "corpo_R6": {
+    "hash": "fa84c72b5f4f",
+    "dur": 11.9
+  },
+  "prio_M": {
+    "hash": "7417aa8e2bfa",
+    "dur": 3.01
+  },
+  "prio_F": {
+    "hash": "4aaca361a167",
+    "dur": 3.97
+  },
+  "prio_C": {
+    "hash": "c2fb477da1e1",
+    "dur": 3.22
+  },
+  "prio_D": {
+    "hash": "a9eb9df7295b",
+    "dur": 2.67
+  },
+  "prio_O": {
+    "hash": "5c7dc3fbf58a",
+    "dur": 3.56
+  },
+  "prio_G": {
+    "hash": "e768cfd24295",
+    "dur": 3.22
+  },
+  "prio_P": {
+    "hash": "5a5d63e1a0a4",
+    "dur": 2.97
+  },
+  "prio_nenhum": {
+    "hash": "fb0d51169e36",
+    "dur": 2.97
+  },
+  "prova": {
+    "hash": "ac812f5ba847",
+    "dur": 11.18
+  },
+  "encerramento": {
+    "hash": "603257331e85",
+    "dur": 15.32
+  },
+  "apos_cta": {
+    "hash": "fa081f52a462",
+    "dur": 5.87
+  },
+  "inatividade": {
+    "hash": "942414b350d6",
+    "dur": 3.07
   }
 }

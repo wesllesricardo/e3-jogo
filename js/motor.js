@@ -16,7 +16,7 @@ export const F_HEAD = '"Archivo", system-ui, sans-serif';
 export const F_BODY = '"Plus Jakarta Sans", system-ui, sans-serif';
 export const PPM = 900;     // pixels de textura por metro (nitidez do texto)
 export const R = 2.8;       // distância padrão do conteúdo (m)
-export const OLHAR = 1.3;   // segundos de olhar fixo para "clicar"
+export const OLHAR = 1.5;   // segundos de olhar fixo para selecionar (roteiro: 1,5 s)
 
 export const E = {
   out: k => 1 - Math.pow(1 - k, 3),

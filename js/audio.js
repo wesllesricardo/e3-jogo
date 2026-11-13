@@ -253,3 +253,12 @@ export function setPosVoz(p) {
   if (!bus.vozPan) return;
   bus.vozPan.positionX.value = p.x; bus.vozPan.positionY.value = p.y; bus.vozPan.positionZ.value = p.z;
 }
+
+// volume geral (0 a 1)
+export function setVolume(v) {
+  if (!bus.master) return;
+  bus.master.gain.value = Math.max(0, Math.min(1, v));
+}
+export function volume() { return bus.master ? bus.master.gain.value : 1; }
+// a narração está tocando?
+export function narrandoAgora() { return !!fonteVoz; }

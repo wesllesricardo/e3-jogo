@@ -132,11 +132,13 @@ frio.add(corpo);
 const cabeca = new THREE.Mesh(new THREE.SphereGeometry(0.115, 20, 16), matCorpo);
 cabeca.position.set(0, 1.34, -4.12);
 frio.add(cabeca);
+const bracos = [];
 for (const sx of [-0.2, 0.2]) {
   const braco = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.36, 4, 8), matCorpo);
   braco.position.set(sx, 0.9, -3.95);
   braco.rotation.x = 1.25;
   frio.add(braco);
+  bracos.push(braco);
 }
 // luminária fria que pisca
 caixa(0.03, 0.42, 0.03, 0.55, 0.99, -3.85);
@@ -360,3 +362,16 @@ export function flashLuz() {
   tw(1.8, k => { logo.position.lerpVectors(LOGO_PERTO, LOGO_CEU, k); logo.scale.setScalar(0.7 + 0.3 * k); },
     { delay: 1.6, ease: E.inOut, done: () => { logoSubindo = false; } });
 }
+
+// partes do escritório escuro que o jogo controla
+export const partesFrio = {
+  get pessoa() { return [corpo, cabeca, ...bracos]; },
+  get agenda() { return agenda; },
+  get grafico() { return grafico; },
+  get pontoQueda() { return pontoQueda; },
+  get titulo() { return tituloFrio; },
+  get palavras() { return palavras; },
+  get lampada() { return lampada; },
+  get cupula() { return cupula; },
+  get halo() { return halo; },
+};
