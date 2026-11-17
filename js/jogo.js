@@ -881,6 +881,20 @@ function encerrar(motivo = 'saida') {
 }
 
 // ================================================================== sessão ===
+// No Quest, os primeiros quadros da sessão imersiva ainda não trazem a posição real da
+// cabeça; alinhar nesse instante deixa o caminho girado. Espera alguns quadros rastreados.
+let esperaPose = null;
+function quandoPoseValida(fn) {
+  if (!renderer.xr.isPresenting) { fn(); return; }
+  esperaPose = { fn, ok: 0, t0: performance.now() };
+}
+function checarPose() {
+  if (!esperaPose) return;
+  const f = renderer.xr.getFrame(), ref = renderer.xr.getReferenceSpace();
+  const pose = f && ref ? f.getViewerPose(ref) : null;
+  esperaPose.ok = pose && !pose.emulatedPosition ? esperaPose.ok + 1 : 0;
+  if (esperaPose.ok >= 20 || performance.now() - esperaPose.t0 > 4000) { const { fn } = esperaPose; esperaPose = null; fn(); }
+}
 function recalibrar() {
   world.rotation.y = yawCabeca();
   camera.getWorldPosition(v3);
@@ -914,7 +928,9 @@ async function entrar() {
       await renderer.xr.setSession(session);
       session.addEventListener('visibilitychange', () => { if (session.visibilityState !== 'visible' && !pausado && etapa !== 'inicial' && etapa !== 'fim') pausar(); });
       esconderTela();
-      setTimeout(() => { recalibrar(); abrirCenario(); }, 400);
+      const ref = renderer.xr.getReferenceSpace();
+      if (ref) ref.addEventListener('reset', () => quandoPoseValida(recalibrar));
+      quandoPoseValida(() => { recalibrar(); abrirCenario(); });
     } catch (err) { $('status').textContent = 'Não foi possível entrar no modo imersivo: ' + (err && err.message ? err.message : err); }
   } else { esconderTela(); recalibrar(); abrirCenario(); }
 }
@@ -1021,7 +1037,7 @@ function sim(dt) {
   checarReset(dt);
   checarInatividade();
 }
-function frame() { sim(Math.min(clock.getDelta(), 0.05)); renderer.render(scene, camera); }
+function frame() { checarPose(); sim(Math.min(clock.getDelta(), 0.05)); renderer.render(scene, camera); }
 
 async function boot() {
   const fontes = ['700 20px "Archivo"', '800 20px "Archivo"', '500 20px "Plus Jakarta Sans"', '600 20px "Plus Jakarta Sans"', '700 20px "Plus Jakarta Sans"'];
