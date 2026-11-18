@@ -20,6 +20,9 @@
   .tela { position:fixed; inset:0; display:grid; place-items:center; padding:24px; overflow:auto;
     background:radial-gradient(120% 90% at 50% 40%, rgba(7,5,2,.6), rgba(7,5,2,.96));
     backdrop-filter:blur(6px); transition:opacity .4s ease, visibility .4s; z-index:5; }
+  .fechado { position:fixed; inset:0; display:grid; place-items:center; padding:24px; background:#070502; z-index:20; }
+  .fechado.off { display:none; }
+  .fechado h1 { margin-top:22px; }
   .tela.off { opacity:0; visibility:hidden; pointer-events:none; }
   .box { width:100%; max-width:600px; text-align:center; }
   .logo { width:80px; height:auto; }
@@ -82,9 +85,17 @@
   </div>
 </div>
 
+<div id="fechado" class="fechado off">
+  <div class="box">
+    <img class="logo" src="media/logo-e3.png" alt="E3 Company">
+    <h1>Experiência <em>fechada.</em></h1>
+    <p>Tudo foi encerrado: imagem, som e vídeos. Pode tirar o óculos com calma.</p>
+    <button class="pri" id="abrirDeNovo" type="button">Abrir de novo</button>
+  </div>
+</div>
 <div id="hud" class="off">
   <span>Arraste para olhar · Clique para escolher · P pausa · C recalibra · R reinicia</span>
-  <button class="sec" id="resetHud">↺ Resetar</button>
+  <span style="display:flex;gap:8px"><button class="sec" id="resetHud">↺ Resetar</button><button class="sec" id="fecharHud">✕ Fechar</button></span>
 </div>
 
 <script type="module">

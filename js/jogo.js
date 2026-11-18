@@ -9,7 +9,7 @@ import {
   panel, rich, eyebrow, cardBg, pill, card, botao, setLabel, place, glow, tw, E, reveal, leave, kill, setAlpha, op,
   clamp, lerp, updateTweens, updateUpdaters, updatePointers, updateCameraTela, yawCabeca, view, addUpdater, clicavel,
 } from './motor.js';
-import { iniciarAudio, setHumor, sfx, narrar, pararNarracao, updateAudio, setNarracaoAtiva, audio, setVolume, volume, duracaoFala, somEspacialVideo, duckVideo, setEnergia } from './audio.js';
+import { iniciarAudio, setHumor, sfx, narrar, pararNarracao, updateAudio, setNarracaoAtiva, audio, setVolume, volume, duracaoFala, somEspacialVideo, duckVideo, setEnergia, suspenderAudio } from './audio.js';
 import { amb, setProg, setLuz, updateAmbiente, carregarLogo, girarNucleo, frio, partesFrio, flashLuz } from './ambiente.js';
 import { criarGuia, guia, updateGuia } from './guia.js';
 import { JOGO as J, CONFIG_VERSAO } from './jogo-dados.js';
@@ -277,6 +277,52 @@ bPausa.position.y = 0.16; bSair.position.y = -0.16;
 consoleG.add(bPausa, bRecal, bSair);
 consoleG.visible = false;
 
+// FECHAR: fecha tudo de verdade (sai do modo imersivo, para som, vídeos e a cena).
+// Pede um segundo toque. "Abrir de novo" recarrega a página do zero.
+let fechaAte = 0, fechado = false;
+const botoesFechar = [];
+function criarFechar(w = 0.4, h = 0.12) {
+  const b = card(w, h, (ctx, W, H, st) => pill(ctx, W, H, st.label, { fill: st.confirma ? '#E0524B' : 'rgba(20,16,12,0.92)', stroke: '#E0524B', color: COL.text, size: H * 0.36 }),
+    { label: '✕ FECHAR', confirma: false }, () => pedirFechar());
+  botoesFechar.push(b);
+  return b;
+}
+function rotularFechar(confirma) {
+  botoesFechar.forEach(b => {
+    const st = b.userData.mesh.userData.state;
+    if (st.confirma === confirma) return;
+    st.confirma = confirma; st.label = confirma ? 'Toque de novo' : '✕ FECHAR';
+    b.userData.mesh.userData.redraw();
+  });
+}
+function pedirFechar() {
+  if (S.T < fechaAte) { fechaAte = 0; rotularFechar(false); fecharTudo(); return; }
+  fechaAte = S.T + 3;
+  rotularFechar(true);
+  tw(3.05, () => {}, { ease: E.lin, done: () => { if (S.T >= fechaAte) rotularFechar(false); } });
+}
+async function fecharTudo() {
+  if (fechado) return;
+  fechado = true;
+  if (s && s.status === 'em_andamento') { s.status = 'abandonada'; registrar('session_abandoned', { motivo: 'fechar', question_index: s.question_index }); }
+  limparSessao();
+  calarFala();
+  [videoProva, videoReel].forEach(v => v && v.pause());
+  videoProva = videoReel = null;
+  duckVideo(false);
+  setHumor('nenhum', 0.2);
+  const sessao = renderer.xr.getSession();
+  if (sessao) await sessao.end().catch(() => {});
+  renderer.setAnimationLoop(null);
+  suspenderAudio();
+  ['inicio', 'resumo', 'hud'].forEach(id => $(id) && $(id).classList.add('off'));
+  $('fechado').classList.remove('off');
+  try { window.close(); } catch (e) { /* o navegador pode não deixar fechar a aba */ }
+}
+const bFechar = criarFechar();
+bFechar.position.y = -0.32;
+consoleG.add(bFechar);
+
 // ================================================================= etapas ===
 function trocar(fn) {
   if (palco) leave(palco, 0.35);
@@ -305,6 +351,9 @@ function telaInicial() {
     const b = botao(0.82, 0.2, T.botao, () => comecar(), { primary: true });
     place(b, 0, 1.1, 2.1);
     g.add(b); reveal(b, { delay: 0.3, owner: g });
+    const f = criarFechar();
+    place(f, 0, 0.86, 2.05);
+    g.add(f); reveal(f, { delay: 0.4, owner: g });
     guia.alvo(b, { avisar: false });
   });
 }
@@ -1041,7 +1090,10 @@ $('jogar').addEventListener('click', entrar);
 $('ultimo').addEventListener('click', () => mostrarResumoOperador());
 $('voltarInicio').addEventListener('click', () => { $('resumo').classList.add('off'); $('inicio').classList.remove('off'); });
 $('resetHud').addEventListener('click', () => reiniciar());
+$('fecharHud').addEventListener('click', () => fecharTudo());
+$('abrirDeNovo').addEventListener('click', () => location.reload());
 renderer.xr.addEventListener('sessionend', () => {
+  if (fechado) return;
   view.yaw = view.pitch = view.tyaw = view.tpitch = 0;
   camera.position.set(0, 1.6, 0);
   world.position.y = 0;

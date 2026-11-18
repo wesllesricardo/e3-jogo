@@ -344,3 +344,6 @@ export function narrandoAgora() { return !!fonteVoz; }
 // Energia da trilha (jogo): cresce com as fases do escritório.
 // 1 = acordes, baixo e arpejo · 2 = + bumbo · 3 = + palmas e chimbal · 4 = completa
 export function setEnergia(n) { energia = Math.max(1, Math.min(4, n)); }
+
+// FECHAR: silencia tudo de uma vez (o contexto de áudio para de processar)
+export function suspenderAudio() { if (ctx) ctx.suspend().catch(() => {}); }
