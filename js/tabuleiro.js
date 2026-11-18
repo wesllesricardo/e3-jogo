@@ -1,17 +1,20 @@
 // =============================================================================
-// O jogador É o peão: ele fica de pé sobre um caminho de 32 casas gigantes que
-// vai do escritório escuro até a luz da E3 (casa 32 = R$ 1 milhão por mês).
+// O jogador É o peão: ele fica de pé sobre um caminho de casas gigantes que vai
+// do escritório escuro até a luz da E3 (última casa = R$ 1 milhão por mês).
 // Avançar: as casas acendem em sequência à frente dele e um único piscar o leva
 // até a casa de destino (movimento confortável, sem deslizar a câmera).
 // =============================================================================
 import { THREE, ORG, YEL, COL, F_HEAD, F_BODY, camera, panel, glow, tw, E, op, clamp } from './motor.js';
 import { sfx } from './audio.js';
+import { JOGO } from './jogo-dados.js';
 
-const N = 32;
+const N = JOGO.totalCasas;
 export const PASSO = 0.55;          // distância entre casas (m)
 const LARG = 1.3, COMP = 0.47;      // tamanho de cada casa
 const v3 = new THREE.Vector3();
-const FAIXAS = { 1: 'R$ 10 mil', 5: 'R$ 30 mil', 9: 'R$ 70 mil', 13: 'R$ 150 mil', 17: 'R$ 300 mil', 21: 'R$ 500 mil', 25: 'R$ 700 mil', 29: 'R$ 850 mil' };
+// placa na primeira casa de cada faixa de faturamento (menos a do milhão, que é a chegada)
+const FAIXAS = {}, LADO = {};
+JOGO.receita.slice(1, -1).forEach((f, k) => { const n = JOGO.receita[k].ate + 1; FAIXAS[n] = f.texto; LADO[n] = k % 2 ? 1 : -1; });
 
 export const tab = { caminho: null, casa: 0, andando: false, casas: [], foco: null, peao: null };
 
@@ -40,7 +43,7 @@ export function criarTabuleiro(parent) {
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       if (ultima) {
         ctx.fillStyle = COL.yellow; ctx.font = `800 13px ${F_HEAD}`; ctx.fillText('R$ 1 milhão/mês', W / 2, H / 2 - 5);
-        ctx.fillStyle = COL.text; ctx.font = `700 5px ${F_BODY}`; ctx.fillText('CASA 32', W / 2, H / 2 + 9);
+        ctx.fillStyle = COL.text; ctx.font = `700 5px ${F_BODY}`; ctx.fillText(`CASA ${N}`, W / 2, H / 2 + 9);
         return;
       }
       ctx.fillStyle = st.on ? COL.ink : n === 0 ? COL.yellow : 'rgba(236,236,236,0.75)';
@@ -62,7 +65,7 @@ export function criarTabuleiro(parent) {
         ctx.fillStyle = COL.mute; ctx.font = `700 3.6px ${F_BODY}`; ctx.fillText(`A PARTIR DA CASA ${n}`, W / 2, 6);
         ctx.fillStyle = COL.text; ctx.font = `800 8px ${F_HEAD}`; ctx.fillText(`${FAIXAS[n]}/mês`, W / 2, 14.5);
       });
-      const lado = n % 8 === 1 ? -1 : 1;     // alterna os lados para não poluir
+      const lado = LADO[n];     // alterna os lados para não poluir
       placa.position.set(lado * (LARG / 2 + 0.5), 0.52, zCasa(n));
       placa.rotation.set(-0.35, -lado * 0.35, 0, 'YXZ');
       const poste = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.42, 8), new THREE.MeshBasicMaterial({ color: corCasa(n), transparent: true, opacity: 0.6 }));
@@ -70,8 +73,8 @@ export function criarTabuleiro(parent) {
       g.add(placa, poste);
     }
   }
-  // arco de luz na chegada (casa 32)
-  // o arco fica acima da cabeça de quem chega à casa 32 (passa por baixo dele)
+  // arco de luz na chegada (última casa)
+  // o arco fica acima da cabeça de quem chega lá (passa por baixo dele)
   const arco = new THREE.Mesh(new THREE.TorusGeometry(2.3, 0.03, 12, 64, Math.PI), new THREE.MeshBasicMaterial({ color: YEL, transparent: true, opacity: 0.7, toneMapped: false }));
   arco.position.set(0, 0, zCasa(N) + 0.6);
   g.add(arco);
@@ -134,7 +137,7 @@ export function andar(de, para, { aoCruzarFaixa } = {}) {
     const fim = () => { tab.andando = false; op(tab.foco, 0); resolve(); };
     if (de === para) {
       // permanece: a casa atual pulsa
-      tw(0.9, k => { tab.casas[de].base.material.emissiveIntensity = 0.85 + 0.6 * Math.sin(k * Math.PI * 2); }, { ease: E.lin, done: () => { marcar(de, de > 0); fim(); } });
+      tw(0.6, k => { tab.casas[de].base.material.emissiveIntensity = 0.85 + 0.6 * Math.sin(k * Math.PI * 2); }, { ease: E.lin, done: () => { marcar(de, de > 0); fim(); } });
       return;
     }
     let i = de;
@@ -144,7 +147,7 @@ export function andar(de, para, { aoCruzarFaixa } = {}) {
       piscar(() => posicionar(para)).then(() => { sfx(dir > 0 ? 'sucesso' : 'chamado'); fim(); });
     };
     const acender = () => {
-      if (i === para) { tw(0.35, () => {}, { ease: E.lin, done: saltar }); return; }
+      if (i === para) { tw(0.15, () => {}, { ease: E.lin, done: saltar }); return; }
       i += dir;
       const alvo = dir > 0 ? i : i + 1;          // ao voltar, a casa que fica para trás acende em vermelho
       if (dir > 0) marcar(alvo, true);
@@ -152,14 +155,14 @@ export function andar(de, para, { aoCruzarFaixa } = {}) {
       tab.casas[alvo].casa.getWorldPosition(v3);
       sfx(dir > 0 ? 'tick' : 'soltar', v3);
       if (dir > 0 && (FAIXAS[i] || i === N)) aoCruzarFaixa && aoCruzarFaixa(i, v3.clone().setY(1.2));
-      tw(0.26, () => {}, { ease: E.lin, done: acender });
+      tw(0.13, () => {}, { ease: E.lin, done: acender });
     };
     acender();
   });
 }
 
 // Carta surpresa: surge da casa à frente, gira e voa até o destino (posição do mundo).
-export function virarCarta(destino, dur = 1.3) {
+export function virarCarta(destino, dur = 0.9) {
   return new Promise(resolve => {
     const mat = new THREE.MeshStandardMaterial({ color: 0x2b1a0e, emissive: ORG, emissiveIntensity: 0.6, transparent: true });
     const c = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.008, 0.3), mat);

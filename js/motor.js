@@ -543,10 +543,10 @@ export function updatePointers(dt) {
       if (h.object !== gazeAlvo) { gazeAlvo = h.object; gazeT = 0; gazeFeito = false; }
       else if (!gazeFeito) {
         gazeT += dt;
-        if (gazeT >= OLHAR) { gazeFeito = true; gazeT = 0; click(h.object); }
+        if (gazeT >= (h.object.userData.olhar || OLHAR)) { gazeFeito = true; gazeT = 0; click(h.object); }
       }
     } else { gazeAlvo = null; gazeT = 0; gazeFeito = false; }
-    retFill.scale.setScalar(Math.max(0.001, gazeT / OLHAR));
+    retFill.scale.setScalar(Math.max(0.001, gazeT / ((gazeAlvo && gazeAlvo.userData.olhar) || OLHAR)));
   }
   if (!xr && mouseIn && !dragCam && !mouseDrag) {
     raycaster.setFromCamera(mouse, camera);

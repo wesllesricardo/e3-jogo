@@ -80,7 +80,7 @@
   const ab = {};
   for (const l of iniciadas.filter(l => !tem(l, 'result_shown'))) {
     const n = l.filter(e => e.ev === 'answer_confirmed').length;
-    const etapa = !tem(l, 'tutorial_completed') ? 'Antes do treino' : n >= 8 ? 'Resultado' : `Decisão ${n + 1}`;
+    const etapa = !tem(l, 'tutorial_completed') ? 'Antes do treino' : n >= J.perguntas.length ? 'Resultado' : `Decisão ${n + 1}`;
     ab[etapa] = (ab[etapa] || 0) + 1;
   }
   const abMax = Math.max(0, ...Object.values(ab));
@@ -91,10 +91,10 @@
   document.getElementById('finais').innerHTML = ['R1', 'R2', 'R3', 'R4', 'R5', 'R6'].map(f => linha(`${f} · ${J.finais[f].titulo}`, fin[f] || 0, fMax)).join('');
   const esc = {};
   for (const e of ev.filter(e => e.ev === 'answer_confirmed')) { (esc[e.question_id] ||= {})[e.answer_id] = (esc[e.question_id][e.answer_id] || 0) + 1; }
-  document.getElementById('escolhas').innerHTML = J.perguntas.map(q => {
+  document.getElementById('escolhas').innerHTML = J.perguntas.map((q, i) => {
     const m = Object.entries(esc[q.id] || {}).sort((a, b) => b[1] - a[1])[0];
     const alt = m && q.alternativas.find(a => a.id === m[0]);
-    return `<tr><td>${q.id}</td><td>${alt ? alt.texto : '—'}</td><td>${m ? m[1] : 0}</td></tr>`;
+    return `<tr><td>${i + 1}</td><td>${alt ? alt.texto : '—'}</td><td>${m ? m[1] : 0}</td></tr>`;
   }).join('');
   document.getElementById('csv').addEventListener('click', () => {
     const cols = ['t', 'ev', 'session_id', 'estacao', 'config', 'question_id', 'answer_id', 'casa', 'event_type', 'choice', 'final', 'valor', 'motivo', 'question_index'];

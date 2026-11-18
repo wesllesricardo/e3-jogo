@@ -1,230 +1,267 @@
 {
   "abertura": {
-    "hash": "d3ae5e4ab60b",
-    "dur": 13.03
+    "hash": "a7c3e42c6747",
+    "dur": 5.31,
+    "ritmo": 1.2
   },
   "treino": {
-    "hash": "0d8485a0c82b",
-    "dur": 7.08
+    "hash": "0eaf41173f9e",
+    "dur": 2.58,
+    "ritmo": 1.2
   },
   "treino_ok": {
-    "hash": "a7981548ca18",
-    "dur": 2.6
+    "hash": "9ae659bc12be",
+    "dur": 1.6,
+    "ritmo": 1.2
   },
   "Q1": {
     "hash": "2cc1d31a41e9",
-    "dur": 4.29
-  },
-  "Q2": {
-    "hash": "9effe0fc187a",
-    "dur": 4.22
-  },
-  "Q3": {
-    "hash": "cb734309f165",
-    "dur": 5.44
-  },
-  "Q4": {
-    "hash": "24acae2787cd",
-    "dur": 5.59
+    "dur": 3.58,
+    "ritmo": 1.2
   },
   "Q5": {
     "hash": "f4531c47ab1e",
-    "dur": 4.99
+    "dur": 4.16,
+    "ritmo": 1.2
   },
   "Q6": {
     "hash": "1767ba79df3a",
-    "dur": 6.36
+    "dur": 5.3,
+    "ritmo": 1.2
   },
   "Q7": {
     "hash": "a19ad5081f5b",
-    "dur": 4.35
+    "dur": 3.62,
+    "ritmo": 1.2
   },
   "Q8": {
     "hash": "31d1769cbe92",
-    "dur": 4.03
-  },
-  "trans_Q2": {
-    "hash": "4277087da37f",
-    "dur": 4.76
+    "dur": 3.35,
+    "ritmo": 1.2
   },
   "trans_Q4": {
-    "hash": "17262d3e734d",
-    "dur": 6.78
+    "hash": "9c68aba32df4",
+    "dur": 2.56,
+    "ritmo": 1.2
   },
   "trans_evento": {
-    "hash": "d039ad3bd8e0",
-    "dur": 5.76
+    "hash": "4846160b36c8",
+    "dur": 2.38,
+    "ritmo": 1.2
   },
   "trans_Q8": {
-    "hash": "56e5c981cce0",
-    "dur": 4.05
+    "hash": "dd6fd215c886",
+    "dur": 1.39,
+    "ritmo": 1.2
   },
   "evento_abertura": {
-    "hash": "4380fd4ae4f2",
-    "dur": 10.39
+    "hash": "8e272d9ba03c",
+    "dur": 4.72,
+    "ritmo": 1.2
   },
   "EV1": {
-    "hash": "a70538dfe41a",
-    "dur": 9.62
+    "hash": "0f568531571b",
+    "dur": 4.65,
+    "ritmo": 1.2
   },
   "EV1_rec": {
-    "hash": "d77cc9ce3a19",
-    "dur": 9.96
+    "hash": "d465ed8045bc",
+    "dur": 3.12,
+    "ritmo": 1.2
   },
   "EV1_ativar": {
-    "hash": "04eb6b7c8899",
-    "dur": 4.74
+    "hash": "ebc73ceedf32",
+    "dur": 1.3,
+    "ritmo": 1.2
   },
   "EV1_seguir": {
-    "hash": "070ed24b1b63",
-    "dur": 5.16
+    "hash": "b08962930614",
+    "dur": 2.9,
+    "ritmo": 1.2
   },
   "EV2": {
-    "hash": "3f34c847c6c8",
-    "dur": 13.78
+    "hash": "00a6ecfd8e7a",
+    "dur": 4.56,
+    "ritmo": 1.2
   },
   "EV3": {
-    "hash": "e6d697b676f2",
-    "dur": 9.94
+    "hash": "768f4030a012",
+    "dur": 3.27,
+    "ritmo": 1.2
   },
   "tit_R1": {
     "hash": "e543d9f5ea3b",
-    "dur": 2.13
+    "dur": 1.78,
+    "ritmo": 1.2
   },
   "tit_R2": {
     "hash": "888e82336731",
-    "dur": 3.09
+    "dur": 2.58,
+    "ritmo": 1.2
   },
   "tit_R3": {
     "hash": "dc4cb7f61c93",
-    "dur": 1.81
+    "dur": 1.5,
+    "ritmo": 1.2
   },
   "tit_R4": {
     "hash": "6f1fad2240f9",
-    "dur": 2.86
+    "dur": 2.39,
+    "ritmo": 1.2
   },
   "tit_R5": {
     "hash": "7d451f21b553",
-    "dur": 3.09
+    "dur": 2.57,
+    "ritmo": 1.2
   },
   "tit_R6": {
     "hash": "d82d496d1f0b",
-    "dur": 3.03
+    "dur": 2.52,
+    "ritmo": 1.2
   },
   "parabens": {
     "hash": "8a9a649134fb",
-    "dur": 0.9
+    "dur": 0.76,
+    "ritmo": 1.2
   },
   "val_0": {
     "hash": "738af873111d",
-    "dur": 2.45
+    "dur": 2.05,
+    "ritmo": 1.2
   },
   "val_10": {
     "hash": "d836e2c039d4",
-    "dur": 2.62
+    "dur": 2.18,
+    "ritmo": 1.2
   },
   "val_30": {
     "hash": "ef5d94bfe257",
-    "dur": 2.69
+    "dur": 2.24,
+    "ritmo": 1.2
   },
   "val_70": {
     "hash": "8301175187f4",
-    "dur": 2.82
+    "dur": 2.35,
+    "ritmo": 1.2
   },
   "val_150": {
     "hash": "d0000d9b0192",
-    "dur": 3.33
+    "dur": 2.78,
+    "ritmo": 1.2
   },
   "val_300": {
     "hash": "3371965f2f64",
-    "dur": 2.9
+    "dur": 2.43,
+    "ritmo": 1.2
   },
   "val_500": {
     "hash": "3a62e3b7794a",
-    "dur": 2.77
+    "dur": 2.32,
+    "ritmo": 1.2
   },
   "val_700": {
     "hash": "2ac372ff8322",
-    "dur": 2.99
+    "dur": 2.5,
+    "ritmo": 1.2
   },
   "val_850": {
     "hash": "9a9684f54c2f",
-    "dur": 3.67
+    "dur": 3.06,
+    "ritmo": 1.2
   },
   "corpo_R1": {
-    "hash": "734180be6fe3",
-    "dur": 8.13
+    "hash": "4a75ce9da978",
+    "dur": 4.36,
+    "ritmo": 1.2
   },
   "corpo_R2": {
-    "hash": "b772d36062c6",
-    "dur": 6.55
+    "hash": "a8d765e949c3",
+    "dur": 2.77,
+    "ritmo": 1.2
   },
   "corpo_R3": {
-    "hash": "92131715b63b",
-    "dur": 6.36
+    "hash": "6be48d3e54cf",
+    "dur": 2.49,
+    "ritmo": 1.2
   },
   "corpo_R4": {
-    "hash": "e3105b2bbbb2",
-    "dur": 11.35
+    "hash": "3d6eb0f0edae",
+    "dur": 4.35,
+    "ritmo": 1.2
   },
   "corpo_R5": {
-    "hash": "41950b5f5ec3",
-    "dur": 12.99
+    "hash": "9c1e1d38932a",
+    "dur": 4.51,
+    "ritmo": 1.2
   },
   "corpo_R6": {
-    "hash": "fa84c72b5f4f",
-    "dur": 11.9
+    "hash": "3a8b3a5eb67b",
+    "dur": 2.61,
+    "ritmo": 1.2
   },
   "prio_M": {
     "hash": "7417aa8e2bfa",
-    "dur": 3.01
+    "dur": 2.5,
+    "ritmo": 1.2
   },
   "prio_F": {
     "hash": "4aaca361a167",
-    "dur": 3.97
+    "dur": 3.31,
+    "ritmo": 1.2
   },
   "prio_C": {
     "hash": "c2fb477da1e1",
-    "dur": 3.22
+    "dur": 2.68,
+    "ritmo": 1.2
   },
   "prio_D": {
     "hash": "a9eb9df7295b",
-    "dur": 2.67
+    "dur": 2.22,
+    "ritmo": 1.2
   },
   "prio_O": {
     "hash": "5c7dc3fbf58a",
-    "dur": 3.56
+    "dur": 2.98,
+    "ritmo": 1.2
   },
   "prio_G": {
     "hash": "e768cfd24295",
-    "dur": 3.22
+    "dur": 2.69,
+    "ritmo": 1.2
   },
   "prio_P": {
     "hash": "5a5d63e1a0a4",
-    "dur": 2.97
+    "dur": 2.48,
+    "ritmo": 1.2
   },
   "prio_nenhum": {
     "hash": "fb0d51169e36",
-    "dur": 2.97
+    "dur": 2.48,
+    "ritmo": 1.2
   },
   "prova": {
-    "hash": "ac812f5ba847",
-    "dur": 11.18
+    "hash": "610229b58866",
+    "dur": 4.19,
+    "ritmo": 1.2
   },
   "encerramento": {
-    "hash": "603257331e85",
-    "dur": 15.32
+    "hash": "ac7fdceb5ac3",
+    "dur": 5.67,
+    "ritmo": 1.2
   },
   "apos_cta": {
-    "hash": "fa081f52a462",
-    "dur": 5.87
+    "hash": "7b587cf5eab0",
+    "dur": 3.53,
+    "ritmo": 1.2
   },
   "inatividade": {
     "hash": "942414b350d6",
-    "dur": 3.07
+    "dur": 2.55,
+    "ritmo": 1.2
   },
   "antes_video": {
-    "hash": "efaecbba7d16",
-    "dur": 5.67
+    "hash": "35da743b6607",
+    "dur": 4.21,
+    "ritmo": 1.2
   }
 }

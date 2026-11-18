@@ -5,22 +5,21 @@
 // O cálculo usa os IDs (Q1A, Q1B...), nunca a posição na tela.
 // Valores são simulação educativa: não representam previsão de faturamento.
 // =============================================================================
-export const CONFIG_VERSAO = '2026-11-13.1';
+export const CONFIG_VERSAO = '2026-11-18.2';   // versão enxuta: 5 decisões, 20 casas, escolha sem confirmação
 
 export const JOGO = {
   nome: 'Jogo do Crescimento E3',
-  totalCasas: 32,
+  totalCasas: 20,
 
   telaInicial: {
     titulo: 'Seu escritório pode chegar ao *próximo nível?*',
-    subtitulo: '8 decisões. 4 fases. Uma meta: R$ 1 milhão por mês.',
+    subtitulo: '5 decisões. Uma meta: R$ 1 milhão por mês.',
     botao: 'Começar minha jornada',
     nota: 'Simulação educativa. Os valores não representam previsão ou garantia de faturamento.',
   },
   treino: {
-    texto: 'Olhe ao redor da sua mesa. Vire a cabeça com calma para conhecer as opções. Selecione uma delas e confirme sua decisão.',
+    texto: 'Toque em uma opção para escolher. A escolha vale na hora.',
     objeto: 'Conhecer meu escritório',
-    confirmar: 'Confirmar',
     pronto: 'Tudo pronto. Agora, a primeira escolha é sua.',
   },
 
@@ -43,36 +42,6 @@ export const JOGO = {
         feedback: 'Você ganhou direcionamento, mas ainda precisa colocar o plano em prática. Conhecimento começa a gerar valor quando vira execução.' },
       { id: 'Q1D', texto: 'Alugar um escritório físico antes de ter clientes', casas: 1, marcadores: ['M'], objeto: 'predio',
         feedback: 'Você ganhou um espaço presencial, mas assumiu um custo antes de consolidar a receita. A estrutura, sozinha, não gera demanda.' },
-    ] },
-    { id: 'Q2', fase: 'inicio', texto: 'Os primeiros atendimentos chegaram. Como você vai definir sua atuação?', alternativas: [
-      { id: 'Q2A', texto: 'Atender tudo o que aparecer, sem prioridade', casas: 1, marcadores: ['P'], objeto: 'dispersao',
-        feedback: 'Você amplia as possibilidades de entrada, mas divide sua atenção e dificulta uma comunicação clara.' },
-      { id: 'Q2B', texto: 'Escolher uma área e um público prioritário', casas: 4, marcadores: [], objeto: 'alvo',
-        feedback: 'Seu foco facilita a comunicação, o aprendizado e a organização da entrega. Você começa a construir uma proposta mais clara.' },
-      { id: 'Q2C', texto: 'Priorizar serviços com honorários iniciais', casas: 3, marcadores: [], objeto: 'moeda',
-        feedback: 'Você melhora a perspectiva de entrada de caixa. Ainda precisa avaliar a demanda e sua capacidade de entregar esses serviços.' },
-      { id: 'Q2D', texto: 'Oferecer várias áreas com apoio de parceiros', casas: 2, marcadores: ['O'], objeto: 'rede',
-        feedback: 'As parcerias ampliam sua capacidade de atendimento, mas exigem alinhamento e controle para manter a qualidade.' },
-    ] },
-    { id: 'Q3', fase: 'estruturacao', texto: 'A rotina apertou. Tarefas se repetem e alguns contatos ficam sem retorno. O que você faz?', alternativas: [
-      { id: 'Q3A', texto: 'Organizar o atendimento e implantar CRM com automações', casas: 4, marcadores: [], objeto: 'funil',
-        feedback: 'Você organizou o funil e automatizou tarefas repetitivas. Sua equipe ganha tempo e consegue acompanhar melhor as oportunidades.' },
-      { id: 'Q3B', texto: 'Padronizar tarefas e definir responsáveis', casas: 3, marcadores: [], objeto: 'prancheta',
-        feedback: 'Você reduz o retrabalho e esclarece quem faz o quê. A operação ganha organização para dar o próximo passo.' },
-      { id: 'Q3C', texto: 'Contratar uma pessoa antes de revisar o processo', casas: 2, marcadores: ['M', 'O'], objeto: 'pessoa',
-        feedback: 'Você ganha ajuda, mas também aumenta os custos. Sem clareza do processo, parte dos problemas continua.' },
-      { id: 'Q3D', texto: 'Continuar fazendo tudo sozinho', casas: 1, marcadores: ['F', 'C'], objeto: 'papeis',
-        feedback: 'Você evita um custo agora, mas seu tempo continua sendo o limite do escritório. Alguns contatos seguem sem acompanhamento.' },
-    ] },
-    { id: 'Q4', fase: 'estruturacao', texto: 'Você quer melhorar o resultado, mas ainda não sabe onde está o principal gargalo. Como decide?', alternativas: [
-      { id: 'Q4A', texto: 'Analisar indicadores e agir sobre o principal gargalo', casas: 4, marcadores: [], objeto: 'grafico',
-        feedback: 'Você identificou onde perde oportunidades e direcionou os esforços para a prioridade certa.' },
-      { id: 'Q4B', texto: 'Buscar um diagnóstico externo e executar as prioridades', casas: 4, marcadores: [], objeto: 'lupa',
-        feedback: 'Você ganhou uma leitura especializada e transformou as recomendações em ações. O avanço vem da análise acompanhada de execução.' },
-      { id: 'Q4C', texto: 'Repetir a estratégia de outro escritório', casas: 1, marcadores: ['G'], objeto: 'espelho',
-        feedback: 'Você encontrou uma referência, mas ela pode não resolver o problema do seu escritório. Falta entender o seu contexto.' },
-      { id: 'Q4D', texto: 'Aumentar o investimento sem investigar o problema', casas: 0, marcadores: ['G', 'M'], objeto: 'alavanca',
-        feedback: 'Você compromete mais recursos sem saber se o limite está na demanda, no atendimento ou na operação.' },
     ] },
     { id: 'Q5', fase: 'aceleracao', texto: 'Você já tem alguma demanda e quer crescer. Qual estratégia escolhe para a próxima etapa?', alternativas: [
       { id: 'Q5A', texto: 'Concentrar todo o esforço no canal que já traz clientes', casas: 2, marcadores: ['D'], objeto: 'canal', evento: 'EV1',
@@ -118,8 +87,7 @@ export const JOGO = {
 
   // narrações de transição (depois da pergunta indicada)
   transicoes: {
-    Q2: 'Você deu os primeiros passos. Agora precisa organizar o que começou a construir.',
-    Q4: 'Com suas escolhas de estrutura definidas, chegou a hora de acelerar. Crescer também exige preparo para imprevistos.',
+    Q1: 'Você deu os primeiros passos. Agora é hora de acelerar. Crescer também exige preparo para imprevistos.',
     evento: 'Você viu como sua estratégia reage a uma mudança. Agora, decida como buscar o próximo patamar.',
     Q8: 'Sua jornada está completa. Vamos ver o resultado das suas decisões.',
   },
@@ -128,37 +96,39 @@ export const JOGO = {
   evento: {
     notificacao: 'Um dos seus canais perdeu desempenho',
     seta: 'Veja como sua estrutura responde',
-    abertura: 'Uma mudança em uma plataforma reduziu a entrada de novos contatos. Olhe para o painel à sua esquerda. Agora, veja à direita como suas escolhas prepararam o escritório para reagir.',
+    abertura: 'Uma plataforma mudou e os contatos caíram. Veja à direita como seu escritório reage.',
     EV1: { titulo: 'Sua demanda perdeu força', casas: -2,
-      texto: 'Seu escritório dependia de uma única fonte de oportunidades. Com a queda desse canal, o crescimento perdeu força. Volte duas casas.',
+      texto: 'Você dependia de um único canal. Com a queda, o crescimento perdeu força. Volte duas casas.',
       recuperacao: {
         titulo: 'Ainda dá para virar o jogo',
-        texto: 'Você não controla a mudança da plataforma, mas pode mudar sua estratégia. Organize uma segunda fonte de demanda e o acompanhamento dos contatos.',
+        texto: 'Ative uma segunda fonte de demanda e acompanhe os contatos.',
         ativar: 'Ativar plano de recuperação', seguir: 'Seguir com a estratégia atual',
-        aoAtivar: 'Você começou a reduzir sua dependência. Recupere uma casa e siga sua jornada.',
-        aoSeguir: 'Você segue com o modelo atual. A dependência desse canal continua no seu diagnóstico.',
+        aoAtivar: 'Boa! Recupere uma casa.',
+        aoSeguir: 'Você segue no modelo atual, ainda dependente desse canal.',
         casas: 1, removeMarcador: 'D',
       } },
     EV2: { titulo: 'Sua estrutura faz diferença', casas: 2,
-      texto: 'O canal perdeu desempenho, mas a estratégia construída com a E3 já considerava outras fontes de oportunidades. Você redistribui os esforços e mantém a capacidade de avançar. Avance duas casas.' },
+      texto: 'Sua estratégia com a E3 já tinha outras fontes de oportunidades. Avance duas casas.' },
     EV3: { titulo: 'Sua preparação reduziu o impacto', casas: 0,
-      texto: 'Outros canais ajudam a compensar parte da queda. Você preserva sua posição e segue ajustando a estratégia. Permaneça nesta casa.' },
+      texto: 'Outros canais compensaram parte da queda. Permaneça nesta casa.' },
     continuar: 'Continuar minha jornada',
   },
 
-  // casa → faturamento simulado por mês
+  // casa → faturamento simulado por mês (20 casas)
   receita: [
     { ate: 0, valor: 0, texto: 'R$ 0' },
-    { ate: 4, valor: 10000, texto: 'R$ 10 mil' },
-    { ate: 8, valor: 30000, texto: 'R$ 30 mil' },
-    { ate: 12, valor: 70000, texto: 'R$ 70 mil' },
-    { ate: 16, valor: 150000, texto: 'R$ 150 mil' },
-    { ate: 20, valor: 300000, texto: 'R$ 300 mil' },
-    { ate: 24, valor: 500000, texto: 'R$ 500 mil' },
-    { ate: 28, valor: 700000, texto: 'R$ 700 mil' },
-    { ate: 31, valor: 850000, texto: 'R$ 850 mil' },
-    { ate: 32, valor: 1000000, texto: 'R$ 1 milhão' },
+    { ate: 2, valor: 10000, texto: 'R$ 10 mil' },
+    { ate: 5, valor: 30000, texto: 'R$ 30 mil' },
+    { ate: 8, valor: 70000, texto: 'R$ 70 mil' },
+    { ate: 10, valor: 150000, texto: 'R$ 150 mil' },
+    { ate: 12, valor: 300000, texto: 'R$ 300 mil' },
+    { ate: 15, valor: 500000, texto: 'R$ 500 mil' },
+    { ate: 17, valor: 700000, texto: 'R$ 700 mil' },
+    { ate: 19, valor: 850000, texto: 'R$ 850 mil' },
+    { ate: 20, valor: 1000000, texto: 'R$ 1 milhão' },
   ],
+  // casa máxima de cada final abaixo do milhão (R1 até 150 mil, R2 até 500 mil, R3 até 850 mil)
+  limitesFinais: { R1: 10, R2: 15, R3: 19 },
 
   // desempate fixo dos gargalos
   desempate: ['M', 'F', 'C', 'D', 'O', 'G', 'P'],
@@ -229,9 +199,6 @@ export const JOGO = {
   },
 
   interface: {
-    confirmarPergunta: 'Sua escolha: {alternativa}. Confirmar esta decisão?',
-    confirmar: 'Confirmar',
-    escolherOutra: 'Escolher outra',
     avance: 'Avance {n} casas',
     avanceUma: 'Avance 1 casa',
     permaneca: 'Permaneça nesta casa',

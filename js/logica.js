@@ -1,8 +1,9 @@
 // =============================================================================
 // Regras do Jogo do Crescimento E3 (sem nada de 3D, para poder testar).
 // Segue a "Ordem de execução" do roteiro: valida, soma casas e marcadores uma
-// única vez por pergunta, limita 0–32, aplica a carta após Q6, a recuperação só
+// única vez por pergunta, limita 0–20, aplica a carta após Q6, a recuperação só
 // no EV1 e calcula o final depois de Q8.
+// Versão enxuta: 5 decisões (Q1, Q5, Q6, Q7, Q8). Os IDs do roteiro foram mantidos.
 // =============================================================================
 import { JOGO as J, CONFIG_VERSAO } from './jogo-dados.js';
 
@@ -26,6 +27,9 @@ export function novaSessao() {
     started_at: new Date().toISOString(), completed_at: null,
   };
 }
+
+// posição (question_index) logo depois da Q6, onde entra a carta surpresa
+export const DEPOIS_DO_EVENTO = J.perguntas.findIndex(q => q.id === 'Q6') + 1;
 
 export const pergunta = qid => J.perguntas.find(q => q.id === qid);
 export const alternativa = aid => J.perguntas.flatMap(q => q.alternativas).find(a => a.id === aid);
@@ -82,7 +86,7 @@ export function gargalos(s) {
     .slice(0, 2);
 }
 
-// Até dois acertos (respostas de 4 casas), priorizando Q8 → Q1.
+// Até dois acertos (respostas de 4 casas), da última decisão para a primeira.
 export function acertos(s) {
   const ordem = J.perguntas.map(q => q.id).reverse();
   return ordem.map(qid => s.answers[qid] && alternativa(s.answers[qid]))
@@ -90,10 +94,10 @@ export function acertos(s) {
 }
 
 export function idFinal(s) {
-  const c = s.current_house, M = s.markers.M, F = s.markers.F;
-  if (c <= 16) return 'R1';
-  if (c <= 24) return 'R2';
-  if (c <= 31) return 'R3';
+  const c = s.current_house, M = s.markers.M, F = s.markers.F, L = J.limitesFinais;
+  if (c <= L.R1) return 'R1';
+  if (c <= L.R2) return 'R2';
+  if (c <= L.R3) return 'R3';
   if (M >= 2) return 'R4';
   if (F >= 2) return 'R5';
   return 'R6';

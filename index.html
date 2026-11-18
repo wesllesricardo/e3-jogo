@@ -9,7 +9,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
+{
+ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "./js/ambiente.js": "./js/ambiente.js?v=202611181258",
+  "./js/audio.js": "./js/audio.js?v=202611181258",
+  "./js/conteudo.js": "./js/conteudo.js?v=202611181258",
+  "./js/guia.js": "./js/guia.js?v=202611181258",
+  "./js/jogo-dados.js": "./js/jogo-dados.js?v=202611181258",
+  "./js/jogo.js": "./js/jogo.js?v=202611181258",
+  "./js/logica.js": "./js/logica.js?v=202611181258",
+  "./js/motor.js": "./js/motor.js?v=202611181258",
+  "./js/narracao.js": "./js/narracao.js?v=202611181258",
+  "./js/tabuleiro.js": "./js/tabuleiro.js?v=202611181258"
+ }
+}
 </script>
 <style>
   :root { --bg:#070502; --card:#17120d; --line:rgba(255,255,255,.12); --orange:#FF5F1F; --yellow:#FFEC00; --text:#ECECEC; --mute:#A9A39C; }
@@ -39,6 +53,7 @@
   #jogar { font-size:19px; padding:18px 34px; box-shadow:0 0 40px rgba(255,236,0,.25); }
   button:focus-visible { outline:2px solid var(--yellow); outline-offset:3px; }
   [hidden] { display:none !important; }
+  #versao { margin-top:6px; font-size:12px; color:var(--mute); opacity:.7; font-variant-numeric:tabular-nums; }
   #status { margin-top:16px; font-size:13px; color:var(--mute); min-height:1.4em; }
   .links { margin-top:18px; font-size:14px; display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
   a { color:var(--orange); }
@@ -63,9 +78,10 @@
     <img class="logo" src="media/logo-e3.png" alt="E3 Company">
     <div class="eyebrow">Segunda experiência · <span id="estacao">Estação 1</span></div>
     <h1>Jogo do <em>Crescimento E3</em></h1>
-    <p>Quer descobrir quais decisões podem levar seu escritório ao próximo patamar? Uma jornada rápida em realidade virtual, com oito escolhas. No final, você vê o caminho que construiu.</p>
+    <p>Quer descobrir quais decisões podem levar seu escritório ao próximo patamar? Uma jornada rápida em realidade virtual, com cinco escolhas. No final, você vê o caminho que construiu.</p>
     <button class="pri" id="jogar">Entrar no Jogo do Crescimento E3</button>
     <div id="status">Carregando…</div>
+    <div id="versao">Versão 18/11 12h58</div>
     <p class="nota">Simulação educativa. Os valores não representam previsão ou garantia de faturamento.</p>
     <div class="links">
       <button class="sec" id="ultimo" hidden>Ver o último resultado (atendente)</button>
@@ -102,6 +118,6 @@
   const p = new URLSearchParams(location.search);
   if (p.get('estacao')) document.getElementById('estacao').textContent = 'Estação ' + p.get('estacao');
 </script>
-<script type="module" src="js/jogo.js"></script>
+<script type="module" src="js/jogo.js?v=202611181258"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 // =============================================================================
 // Jogo do Crescimento E3 · VR (roteiro "Jornada do escritório ao milhão")
-// 8 decisões, 4 fases, 32 casas, carta surpresa após Q6, 6 finais.
+// 5 decisões (escolheu, valeu: sem confirmação), 20 casas, carta surpresa após Q6, 6 finais.
 // Regras em logica.js, textos em jogo-dados.js, falas em narracao.js.
 // O visitante fica parado; tudo acontece num arco à frente (−45° a +45°).
 // =============================================================================
@@ -94,12 +94,15 @@ function atualizarLegenda(dt) {
 
 // fala uma sequência de trechos, com legenda; chama fim() ao terminar
 let tokenFala = 0;
+// a fala em andamento (o que falta e o que vem depois): se o jogo pausar, ela recomeça daqui
+let falaPendente = null, falaRetomar = null;
 function falar(chaves, fim) {
   const meu = ++tokenFala;
   const lista = [].concat(chaves).filter(Boolean);
   const proximo = i => {
     if (meu !== tokenFala) return;
-    if (i >= lista.length) { if (fim) fim(); return; }
+    if (i >= lista.length) { falaPendente = null; if (fim) fim(); return; }
+    falaPendente = { lista: lista.slice(i), fim };
     const k = lista[i];
     const texto = LEGENDA[k] || NARRACAO[k] || '';
     const dur = duracaoFala(k) || Math.max(2, texto.split(/\s+/).length / 2.6);
@@ -113,7 +116,7 @@ function falar(chaves, fim) {
   };
   proximo(0);
 }
-function calarFala() { tokenFala++; pararNarracao(); legendaAte = S.T; }
+function calarFala() { tokenFala++; falaPendente = falaRetomar = null; pararNarracao(); legendaAte = S.T; }
 
 // ============================================================== escritório ===
 // O escritório escuro da apresentação vem para a frente e evolui a cada fase.
@@ -187,7 +190,7 @@ function criarDecor() {
   // Escala: visão gerencial com indicadores consolidados
   const kpi = painelDecor(2.6, 0.62, (ctx, W, H, st) => {
     eyebrow(ctx, 'Visão gerencial', 0, 5, W, { align: 'center', size: 4.4 });
-    const ks = [['Fase', 'Escala'], ['Casa', `${st.casa} de 32`], ['Faturamento simulado', st.valor], ['Decisões', `${st.dec} de 8`]];
+    const ks = [['Fase', 'Escala'], ['Casa', `${st.casa} de ${J.totalCasas}`], ['Faturamento simulado', st.valor], ['Decisões', `${st.dec} de ${J.perguntas.length}`]];
     ks.forEach(([r, v], i) => {
       const x = 8 + i * (W - 16) / 4;
       ctx.font = `700 3.8px ${F_BODY}`; ctx.fillStyle = COL.mute; ctx.fillText(r.toUpperCase(), x, 20);
@@ -224,7 +227,7 @@ function resetarFases() {
 const hud = panel(2.3, 0.3, (ctx, W, H, st) => {
   cardBg(ctx, W, H, { r: 5 });
   const fase = J.fases[st.fase] || J.fases[0];
-  const cols = [['Fase', `${fase.nome}`], ['Decisão', `${st.dec} de 8`], ['Casa', `${st.casa} de 32`], ['Faturamento simulado', `${st.valor}/mês`]];
+  const cols = [['Fase', `${fase.nome}`], ['Decisão', `${st.dec} de ${J.perguntas.length}`], ['Casa', `${st.casa} de ${J.totalCasas}`], ['Faturamento simulado', `${st.valor}/mês`]];
   const cw = (W - 16) / 4;
   cols.forEach(([r, v], i) => {
     const x = 8 + i * cw;
@@ -232,14 +235,14 @@ const hud = panel(2.3, 0.3, (ctx, W, H, st) => {
     ctx.letterSpacing = '0px';
     ctx.font = `800 7.2px ${F_HEAD}`; ctx.fillStyle = i === 3 ? COL.yellow : COL.text; ctx.fillText(v, x, 9.5);
   });
-  // trilha das 32 casas
-  const x0 = 8, x1 = W - 8, y = 22.5, n = 32, g = 0.5, w = (x1 - x0 - g * (n - 1)) / n;
+  // trilha das casas
+  const x0 = 8, x1 = W - 8, y = 22.5, n = J.totalCasas, g = 0.5, w = (x1 - x0 - g * (n - 1)) / n;
   for (let i = 0; i < n; i++) {
     const cheio = i < st.casaVis;
     ctx.fillStyle = cheio ? (i >= 31 ? COL.yellow : COL.orange) : 'rgba(255,255,255,0.12)';
     ctx.fillRect(x0 + i * (w + g), y, w, 2.4);
   }
-  const px = x0 + clamp(st.casaVis, 0, 32) * (w + g) - g / 2;
+  const px = x0 + clamp(st.casaVis, 0, J.totalCasas) * (w + g) - g / 2;
   ctx.beginPath(); ctx.arc(px, y + 1.2, 2.1, 0, 7); ctx.fillStyle = COL.yellow; ctx.fill();
   ctx.lineWidth = 0.5; ctx.strokeStyle = COL.ink; ctx.stroke();
 }, { fase: 0, dec: 0, casa: 0, casaVis: 0, valor: 'R$ 0' });
@@ -250,10 +253,10 @@ function atualizarHud(animar = true) {
   const st = hud.userData.state;
   const dec = Object.keys(s.answers).length;
   // durante a carta surpresa a fase ainda é Aceleração
-  const qFase = s.question_index === 6 && !L.eventoResolvido(s) ? 6 : Math.min(8, s.question_index + 1);
+  const qFase = s.question_index === L.DEPOIS_DO_EVENTO && !L.eventoResolvido(s) ? L.DEPOIS_DO_EVENTO : Math.min(J.perguntas.length, s.question_index + 1);
   const fase = J.fases.findIndex(f => f.id === (L.pergunta(`Q${qFase}`) || {}).fase);
   st.fase = Math.max(0, fase);
-  st.dec = Math.min(8, dec + (etapa === 'pergunta' || etapa === 'confirmar' ? 1 : 0));
+  st.dec = Math.min(J.perguntas.length, dec + (etapa === 'pergunta' ? 1 : 0));
   st.casa = s.current_house;
   st.valor = L.receita(s.current_house).texto;
   const de = st.casaVis, para = s.current_house;
@@ -377,7 +380,7 @@ function seguir() {
   if (!s) return;
   if (!s.tutorial) return treino();
   const i = s.question_index;
-  if (i === 6 && !L.eventoResolvido(s)) return evento();
+  if (i === L.DEPOIS_DO_EVENTO && !L.eventoResolvido(s)) return evento();
   if (i < J.perguntas.length) return mostrarPergunta(i);
   return resultado();
 }
@@ -398,17 +401,20 @@ function treino() {
 }
 function confirmarTreino(g) {
   if (etapa !== 'treino') return;
-  etapa = 'confirmar';
-  painelConfirmacao(g, J.treino.objeto, () => {
-    s.tutorial = true; salvar();
-    registrar('tutorial_completed');
-    etapa = 'transicao';
+  s.tutorial = true; salvar();
+  registrar('tutorial_completed');
+  etapa = 'transicao';
+  calarFala();
+  sfx('pegar');
+  tw(0.25, () => {}, { ease: E.lin, done: () => {
     trocar(() => {});
     falar('treino_ok', () => cartaoFase(0, () => seguir()));
-  }, () => { etapa = 'treino'; });
+  } });
 }
 
 // --- cartão de fase -------------------------------------------------------------
+// só as fases que têm perguntas entram na contagem ("Fase 2 de 3")
+const FASES_USADAS = J.fases.filter(f => J.perguntas.some(q => q.fase === f.id));
 function cartaoFase(f, fim, falaKey) {
   etapa = 'transicao';
   mostrarFase(f, true);
@@ -417,14 +423,14 @@ function cartaoFase(f, fim, falaKey) {
   trocar(g => {
     const p = painelTexto(1.8, 0.42, (ctx, W, H) => {
       cardBg(ctx, W, H, { r: 7, accent: COL.yellow, strong: true });
-      eyebrow(ctx, `Fase ${f + 1} de 4`, 0, 8, W, { align: 'center', color: COL.yellow });
+      eyebrow(ctx, `Fase ${FASES_USADAS.indexOf(fase) + 1} de ${FASES_USADAS.length}`, 0, 8, W, { align: 'center', color: COL.yellow });
       rich(ctx, fase.nome, 0, 16, W, 13, { font: F_HEAD, weight: 800, align: 'center' });
       rich(ctx, fase.chamada, 0, 31, W, 6.2, { align: 'center', color: COL.text });
     });
     place(p, 0, 1.62, 2.2); g.add(p); reveal(p, { owner: g });
   });
-  if (falaKey) falar(falaKey, () => tw(0.6, () => {}, { done: fim, ease: E.lin }));
-  else tw(2.8, () => {}, { done: fim, ease: E.lin });
+  if (falaKey) falar(falaKey, () => tw(0.2, () => {}, { done: fim, ease: E.lin }));
+  else tw(1.5, () => {}, { done: fim, ease: E.lin });
 }
 
 // --- pergunta --------------------------------------------------------------------
@@ -475,6 +481,8 @@ function criarAlternativa(g, alt, angulo, aoSelecionar) {
   const alvoObj = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), new THREE.MeshBasicMaterial({ visible: false }));
   holder.add(alvoObj);
   clicavel(alvoObj, () => selecionar());
+  // escolha definitiva: pelo olhar, só com 2,5 s parado em cima (toque/gatilho é na hora)
+  c.userData.mesh.userData.olhar = alvoObj.userData.olhar = 2.5;
   alvoObj.userData.hoverFn = h => { holder.scale.setScalar(1.6 * (1 + 0.15 * Math.min(h, 1))); };
   const brilho = glow(0.5, ORG, 0.25); brilho.position.copy(holder.position); grp.add(brilho);
   addUpdater(g, (t, dt) => { obj.rotation.y += dt * (c.userData.mesh.userData.state.sel ? 2 : 0.6); holder.position.y = 1.58 + Math.sin(t * 1.5 + angulo) * 0.015; });
@@ -495,7 +503,7 @@ function mostrarPergunta(i) {
   const faseIdx = J.fases.findIndex(f => f.id === q.fase);
   // transições entre fases (com a fala do roteiro)
   if (faseIdx > faseVisivel) {
-    const falaKey = i === 2 ? 'trans_Q2' : i === 4 ? 'trans_Q4' : i === 6 ? 'trans_evento' : null;
+    const falaKey = { aceleracao: 'trans_Q4', escala: 'trans_evento' }[q.fase] || null;
     return cartaoFase(faseIdx, () => mostrarPergunta(i), falaKey);
   }
   etapa = 'pergunta';
@@ -504,44 +512,23 @@ function mostrarPergunta(i) {
   guia.casa();
   trocar(g => {
     const p = painelTexto(2.25, 0.3, (ctx, W) => {
-      eyebrow(ctx, `Decisão ${i + 1} de 8 · ${J.fases[faseIdx].nome}`, 0, 0, W, { align: 'center' });
+      eyebrow(ctx, `Decisão ${i + 1} de ${J.perguntas.length} · ${J.fases[faseIdx].nome}`, 0, 0, W, { align: 'center' });
       rich(ctx, q.texto, 0, 10, W, 8.6, { font: F_HEAD, weight: 700, align: 'center', lh: 1.15 });
     });
     place(p, 0, 2.0, 2.35); g.add(p); reveal(p, { owner: g });
-    q.alternativas.forEach((a, k) => criarAlternativa(g, a, ANG[k], (alt, grp) => pedirConfirmacao(g, q, alt)));
+    q.alternativas.forEach((a, k) => criarAlternativa(g, a, ANG[k], alt => escolherAlternativa(q, alt)));
   });
   falar(q.id);
 }
 
-// --- confirmação -----------------------------------------------------------------
-let confG = null;
-function painelConfirmacao(g, texto, ok, cancelar) {
-  if (confG) { leave(confG, 0.2); confG = null; }
-  const c = new THREE.Group();
-  confG = c;
-  g.add(c);
-  (g.userData.alts || []).forEach(a => setAlpha(a.grp, 0.4));
-  const p = painelTexto(1.5, 0.3, (ctx, W, H) => {
-    cardBg(ctx, W, H, { r: 6, accent: COL.yellow, strong: true });
-    rich(ctx, J.interface.confirmarPergunta.replace('{alternativa}', `*${texto}*`), 10, H / 2, W - 20, 6.4, { weight: 600, align: 'center', valign: 'middle', hi: COL.yellow, lh: 1.25 });
-  });
-  place(p, 0, 1.52, 1.7); c.add(p);
-  const bOk = botao(0.5, 0.15, J.interface.confirmar, () => { if (pausado) return; leave(c, 0.2); confG = null; ok(); }, { primary: true });
-  const bNao = botao(0.5, 0.15, J.interface.escolherOutra, () => {
-    if (pausado) return;
-    leave(c, 0.2); confG = null;
-    (g.userData.alts || []).forEach(a => { setAlpha(a.grp, 1); a.marcar(false); });
-    cancelar && cancelar();
-  });
-  place(bOk, 8.5, 1.25, 1.65); place(bNao, -8.5, 1.25, 1.65);
-  c.add(bOk, bNao);
-  reveal(c, { dy: 0.05, dur: 0.4 });
-  guia.alvo(bOk);
-}
-function pedirConfirmacao(g, q, alt) {
-  if (etapa !== 'pergunta' && etapa !== 'confirmar') return;
-  etapa = 'confirmar';
-  painelConfirmacao(g, alt.texto, () => confirmar(q, alt), () => { etapa = 'pergunta'; guia.casa(); });
+// --- escolha ----------------------------------------------------------------------
+// Escolheu, valeu: não há painel de confirmação nem "escolher outra".
+function escolherAlternativa(q, alt) {
+  if (etapa !== 'pergunta' || pausado) return;
+  etapa = 'escolhido';
+  sfx('pegar');
+  // um instante para a opção escolhida acender antes de o peão andar
+  tw(0.25, () => {}, { ease: E.lin, done: () => confirmar(q, alt) });
 }
 function confirmar(q, alt) {
   if (s.answers[q.id]) return;                    // nunca pontua duas vezes
@@ -580,7 +567,7 @@ function mostrarFeedback(q, alt, aprendizado) {
   trocar(g => {
     const p = painelTexto(1.9, 0.76, (ctx, W, H) => {
       cardBg(ctx, W, H, { r: 7, accent: alt.casas >= 3 ? COL.yellow : COL.orange, strong: true });
-      eyebrow(ctx, `Decisão ${s.question_index} de 8 · você escolheu`, 12, 9, W - 24, { size: 4 });
+      eyebrow(ctx, `Decisão ${s.question_index} de ${J.perguntas.length} · você escolheu`, 12, 9, W - 24, { size: 4 });
       let y = rich(ctx, alt.texto, 12, 17, W - 24, 7.6, { font: F_HEAD, weight: 700, lh: 1.12 });
       ctx.font = `800 12px ${F_HEAD}`; ctx.fillStyle = alt.casas >= 3 ? COL.yellow : alt.casas === 0 ? '#FF9A8A' : COL.orange;
       ctx.fillText(textoMovimento(alt.casas), 12, y + 3);
@@ -589,8 +576,8 @@ function mostrarFeedback(q, alt, aprendizado) {
     });
     place(p, 0, 1.62, 2.0); g.add(p); reveal(p, { owner: g });
     const b = botao(0.5, 0.16, J.interface.continuar, () => { if (pausado) return; depoisDoFeedback(q); }, { primary: true });
-    place(b, 0, 1.12, 1.95); g.add(b); reveal(b, { delay: 0.6, owner: g });
-    tw(1.2, () => {}, { owner: g, done: () => guia.alvo(b) });
+    place(b, 0, 1.12, 1.95); g.add(b); reveal(b, { delay: 0.15, owner: g });
+    tw(0.4, () => {}, { owner: g, done: () => guia.alvo(b) });
   });
 }
 function depoisDoFeedback(q) {
@@ -862,7 +849,7 @@ async function cta(g) {
     guia.alvo(b);
   });
   // o vídeo começa sozinho depois do aviso (ou na hora, pelo botão)
-  falar('antes_video', () => tw(1.2, () => {}, { ease: E.lin, done: verVideo }));
+  falar('antes_video', () => tw(0.4, () => {}, { ease: E.lin, done: verVideo }));
 }
 
 // Vídeo de resultados da E3 numa tela vertical à frente do jogador.
@@ -909,8 +896,8 @@ function reelFinal(aoTerminar) {
 
 // resumo para o atendente (sem dados pessoais)
 function resumoTexto(r) {
-  const esc = J.perguntas.map((q, i) => `${q.id}: ${(L.alternativa(s.answers[q.id]) || {}).texto || '—'}`).join('\n');
-  return `${ESTACAO} · código ${s.codigo}\nCenário: ${r.id} – ${r.titulo} (${r.interno})\nResultado: ${r.valor}/mês · casa ${r.casa} de 32\n` +
+  const esc = J.perguntas.map((q, i) => `${i + 1}. ${(L.alternativa(s.answers[q.id]) || {}).texto || '—'}`).join('\n');
+  return `${ESTACAO} · código ${s.codigo}\nCenário: ${r.id} – ${r.titulo} (${r.interno})\nResultado: ${r.valor}/mês · casa ${r.casa} de ${J.totalCasas}\n` +
     `Próximo passo: ${r.gargalos.map(x => x.texto).join('; ') || r.semGargalo}\n` +
     `Carta: ${s.event_type}${s.event_type === 'EV1' ? ` · recuperação ${s.recovery_choice}` : ''}\n${esc}\n\n` +
     `Abordagem: "Você chegou a ${r.valor}/mês na simulação e seu principal próximo passo foi ${(r.gargalos[0] || {}).texto || J.prioridades.nenhum}. Hoje, esse ponto também aparece no seu escritório?"`;
@@ -932,7 +919,9 @@ let painelPausa = null;
 function pausar(oferta = false) {
   if (pausado || etapa === 'inicial' || etapa === 'fim') return;
   pausado = true;
+  const pendente = falaPendente;
   calarFala();
+  falaRetomar = pendente;          // ao continuar, a fala (e o passo seguinte do jogo) recomeça
   if (videoProva) videoProva.pause();
   const g = new THREE.Group();
   painelPausa = g;
@@ -958,7 +947,8 @@ function retomar() {
   if (painelPausa) { leave(painelPausa, 0.25); painelPausa = null; }
   tocou();
   avisouInatividade = false; avisouOperador = false;
-  if (etapa === 'pergunta') { const q = J.perguntas[s.question_index]; if (q) falar(q.id); }
+  if (falaRetomar) { const f = falaRetomar; falaRetomar = null; falar(f.lista, f.fim); }
+  else if (etapa === 'pergunta') { const q = J.perguntas[s.question_index]; if (q) falar(q.id); }
   if (videoProva && etapa === 'resultado') videoProva.play().catch(() => {});
 }
 let painelSair = null;
@@ -1056,8 +1046,8 @@ function abrirCenario() {
     s = salva;
     hud.visible = true; consoleG.visible = true;
     resetarFases();
-    const f = J.fases.findIndex(x => x.id === (J.perguntas[Math.min(7, s.question_index)] || {}).fase);
-    for (let i = 0; i <= Math.max(0, s.question_index >= 6 && !L.eventoResolvido(s) ? 2 : f); i++) mostrarFase(i, false);
+    const f = J.fases.findIndex(x => x.id === (J.perguntas[Math.min(J.perguntas.length - 1, s.question_index)] || {}).fase);
+    for (let i = 0; i <= Math.max(0, s.question_index >= L.DEPOIS_DO_EVENTO && !L.eventoResolvido(s) ? 2 : f); i++) mostrarFase(i, false);
     atualizarHud(false);
     posicionar(s.current_house);
     if (s.event_applied && s.event_type === 'EV1' && !s.recovery_choice) { etapa = 'evento'; trocar(g => recuperacao(g)); }
@@ -1075,7 +1065,7 @@ function mostrarResumoOperador() {
   if (!u) return false;
   const tb = $('resumoTabela');
   tb.innerHTML = '';
-  const linhas = [['Código', u.codigo], ['Cenário', `${u.final} · ${u.titulo}`], ['Direcionamento', u.interno], ['Resultado da simulação', `${u.valor}/mês (casa ${u.casa} de 32)`],
+  const linhas = [['Código', u.codigo], ['Cenário', `${u.final} · ${u.titulo}`], ['Direcionamento', u.interno], ['Resultado da simulação', `${u.valor}/mês (casa ${u.casa} de ${J.totalCasas})`],
     ['Próximo passo', (u.gargalos.length ? u.gargalos : [u.semGargalo]).join(' · ')], ['Acertos', u.acertos.join(' · ') || '—'],
     ['Carta surpresa', `${u.evento}${u.evento === 'EV1' ? ` · recuperação: ${u.recuperacao}` : ''}`], ['Pediu conversa', u.cta ? 'Sim' : 'Ainda não'],
     ...u.escolhas.map((e, i) => [`Decisão ${i + 1}`, e.a])];
@@ -1122,12 +1112,13 @@ function checarReset(dt) {
 }
 // inatividade: 20 s convite, 45 s avisa o operador e oferece pausa (nunca escolhe pelo visitante)
 function checarInatividade() {
-  if (pausado || !['pergunta', 'confirmar', 'feedback', 'evento'].includes(etapa)) return;
+  if (pausado || !['pergunta', 'feedback', 'evento'].includes(etapa)) return;
   const parado = S.T - S.lastInput;
-  if (parado > 20 && !avisouInatividade) { avisouInatividade = true; falar('inatividade'); }
+  // o convite só entra na pergunta: em outras etapas ele cortaria a fala que leva ao próximo passo
+  if (parado > 20 && !avisouInatividade) { avisouInatividade = true; if (etapa === 'pergunta') falar('inatividade'); }
   if (parado > 45 && !avisouOperador) {
     avisouOperador = true;
-    avisar('E3 VR - Visitante parado', `${ESTACAO}: visitante parado há 45 s na decisão ${Math.min(8, s.question_index + 1)} de 8.`);
+    avisar('E3 VR - Visitante parado', `${ESTACAO}: visitante parado há 45 s na decisão ${Math.min(J.perguntas.length, s.question_index + 1)} de ${J.perguntas.length}.`);
     pausar(true);
   }
 }
@@ -1174,7 +1165,7 @@ async function boot() {
   window.__jogo = {
     get s() { return s; }, get etapa() { return etapa; }, entrar, comecar, reiniciar, avancarTempo, view, recalibrar, pausar, retomar, reelFinal,
     // atalhos de teste: escolhe e confirma pelo ID
-    responder: aid => { const q = J.perguntas[s.question_index]; const a = q.alternativas.find(x => x.id === aid); if (!a) return; etapa = 'confirmar'; confirmar(q, a); },
+    responder: aid => { const q = J.perguntas[s.question_index]; const a = q.alternativas.find(x => x.id === aid); if (!a) return; etapa = 'escolhido'; confirmar(q, a); },
     treinar: () => { s.tutorial = true; salvar(); registrar('tutorial_completed'); },
     continuar: () => { const q = J.perguntas[s.question_index - 1]; depoisDoFeedback(q); },
     seguir, recuperar: ativar => { L.escolherRecuperacao(s, ativar); salvar(); atualizarHud(); },
