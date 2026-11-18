@@ -202,6 +202,13 @@ export const JOGO = {
     semConexao: 'Avise nossa equipe que você quer conhecer o próximo passo.',
   },
 
+  // vídeo de encerramento: toca depois do pedido de conversa (CTA), no fim do jogo
+  reelFinal: {
+    video: 'media/resultados-e3.mp4',
+    eyebrow: 'Resultados de quem está com a E3',
+    pular: 'Pular ›',
+  },
+
   // prova social (depoimento real e autorizado)
   provaSocial: {
     ativo: true,

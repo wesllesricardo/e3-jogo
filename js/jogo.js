@@ -664,7 +664,7 @@ function recuperacao(g) {
 }
 
 // --- resultado --------------------------------------------------------------------
-let videoProva = null;
+let videoProva = null, videoReel = null;
 function resultado() {
   const r = L.concluir(s);
   if (!r) return;
@@ -785,7 +785,7 @@ async function cta(g) {
   const corpo = resumoTexto(r);
   const ok = await avisar('E3 VR - Quer conhecer o proximo passo', corpo, 'high');
   calarFala();
-  trocar(gg => {
+  const painelFinal = () => trocar(gg => {
     const p = painelTexto(1.9, 0.4, (ctx, W, H) => {
       cardBg(ctx, W, H, { r: 7, accent: COL.yellow, strong: true });
       rich(ctx, ok ? J.resultado.aposCta : `${J.resultado.aposCta} ${J.resultado.semConexao}`, 14, H / 2, W - 28, 7, { font: F_HEAD, weight: 700, align: 'center', valign: 'middle', lh: 1.2 });
@@ -793,7 +793,51 @@ async function cta(g) {
     place(p, 0, 1.6, 2.1); gg.add(p); reveal(p, { owner: gg });
     guia.alvo(p);
   });
-  falar('apos_cta');
+  painelFinal();
+  // depois da fala, o vídeo de resultados encerra a experiência; no fim, o aviso volta
+  falar('apos_cta', () => { if (etapa === 'fim' && s) reelFinal(painelFinal); });
+}
+
+// Vídeo de resultados da E3 numa tela vertical à frente do jogador.
+function reelFinal(aoTerminar) {
+  const R = J.reelFinal;
+  const video = document.createElement('video');
+  video.src = R.video; video.playsInline = true; video.crossOrigin = 'anonymous'; video.preload = 'auto';
+  video.setAttribute('playsinline', '');
+  videoReel = video;
+  const tex = new THREE.VideoTexture(video); tex.colorSpace = THREE.SRGBColorSpace;
+  const HV = 1.3, WV = HV * 9 / 16, Y = 1.55, DIST = 2.1;
+  let acabou = false;
+  const terminar = () => {
+    if (acabou) return;
+    acabou = true;
+    video.pause(); duckVideo(false);
+    guia.mostrar(true);
+    if (videoReel === video) videoReel = null;
+    aoTerminar && aoTerminar();
+  };
+  trocar(gg => {
+    const quadro = new THREE.Group();
+    const moldura = painelTexto(WV + 0.06, HV + 0.06, (ctx, W, H) => cardBg(ctx, W, H, { r: 4, accent: COL.yellow, strong: true }));
+    const tela = new THREE.Mesh(new THREE.PlaneGeometry(WV, HV), new THREE.MeshBasicMaterial({ color: 0x000000, toneMapped: false, transparent: true }));
+    tela.position.z = 0.003; tela.renderOrder = 2;
+    quadro.add(moldura, tela);
+    place(quadro, 0, Y, DIST);
+    const rot = painelTexto(1.3, 0.09, (ctx, W, H) => eyebrow(ctx, R.eyebrow, 0, 1.5, W, { align: 'center', color: COL.yellow }));
+    place(rot, 0, Y + HV / 2 + 0.11, DIST);
+    const pular = botao(0.34, 0.11, R.pular, terminar);
+    place(pular, 0, Y - HV / 2 - 0.14, DIST - 0.05);
+    gg.add(quadro, rot, pular);
+    gg.children.forEach((c, i) => reveal(c, { delay: 0.1 * i, owner: gg }));
+    video.addEventListener('playing', () => { tela.material.map = tex; tela.material.color.set(0xffffff); tela.material.needsUpdate = true; }, { once: true });
+    quadro.getWorldPosition(v3);
+    somEspacialVideo(video, v3);
+  });
+  video.addEventListener('ended', terminar);
+  video.addEventListener('error', terminar);
+  guia.mostrar(false);   // a luz-guia não fica na frente do vídeo
+  duckVideo(true);
+  video.play().catch(() => { video.muted = true; video.play().catch(terminar); });
 }
 
 // resumo para o atendente (sem dados pessoais)
@@ -870,6 +914,7 @@ function encerrar(motivo = 'saida') {
   limparSessao();
   calarFala();
   if (videoProva) { videoProva.pause(); videoProva = null; }
+  if (videoReel) { videoReel.pause(); videoReel = null; duckVideo(false); guia.mostrar(true); }
   pausado = false;
   if (painelPausa) { kill(painelPausa); painelPausa = null; }
   etapa = 'fim';
@@ -905,6 +950,7 @@ function recalibrar() {
 function reiniciar() {
   calarFala();
   if (videoProva) { videoProva.pause(); videoProva = null; }
+  if (videoReel) { videoReel.pause(); videoReel = null; duckVideo(false); guia.mostrar(true); }
   if (s && s.status === 'em_andamento' && Object.keys(s.answers).length) registrar('session_abandoned', { motivo: 'reinicio', question_index: s.question_index });
   s = null;
   limparSessao();
@@ -1055,7 +1101,7 @@ async function boot() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   const avancarTempo = t => { for (let i = 0; i < t * 30; i++) sim(1 / 30); renderer.render(scene, camera); };
   window.__jogo = {
-    get s() { return s; }, get etapa() { return etapa; }, entrar, comecar, reiniciar, avancarTempo, view, recalibrar, pausar, retomar,
+    get s() { return s; }, get etapa() { return etapa; }, entrar, comecar, reiniciar, avancarTempo, view, recalibrar, pausar, retomar, reelFinal,
     // atalhos de teste: escolhe e confirma pelo ID
     responder: aid => { const q = J.perguntas[s.question_index]; const a = q.alternativas.find(x => x.id === aid); if (!a) return; etapa = 'confirmar'; confirmar(q, a); },
     treinar: () => { s.tutorial = true; salvar(); registrar('tutorial_completed'); },
