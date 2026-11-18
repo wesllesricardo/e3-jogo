@@ -198,6 +198,8 @@ export const JOGO = {
     encerramento: 'Diferente do jogo, na vida real você pode contar com apoio em cada etapa. A E3 ajuda a conectar estratégia, marketing, comercial e tecnologia ao momento do seu escritório. Agora, converse com nossa equipe no estande e descubra qual pode ser o seu próximo passo.',
     botaoCta: 'Quero conhecer meu próximo passo',
     botaoEscolhas: 'Ver minhas escolhas',
+    antesVideo: 'Antes de tirar os óculos: assista a um vídeo rápido (30 s) com os resultados de quem já está com a E3.',
+    botaoVideo: 'Assistir agora ▶',
     aposCta: 'Sua jornada terminou. Aguarde a ajuda da nossa equipe para retirar os óculos e continuar a conversa.',
     semConexao: 'Avise nossa equipe que você quer conhecer o próximo passo.',
   },

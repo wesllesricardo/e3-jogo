@@ -9,7 +9,7 @@ import {
   panel, rich, eyebrow, cardBg, pill, card, botao, setLabel, place, glow, tw, E, reveal, leave, kill, setAlpha, op,
   clamp, lerp, updateTweens, updateUpdaters, updatePointers, updateCameraTela, yawCabeca, view, addUpdater, clicavel,
 } from './motor.js';
-import { iniciarAudio, setHumor, sfx, narrar, pararNarracao, updateAudio, setNarracaoAtiva, audio, setVolume, volume, duracaoFala, somEspacialVideo, duckVideo } from './audio.js';
+import { iniciarAudio, setHumor, sfx, narrar, pararNarracao, updateAudio, setNarracaoAtiva, audio, setVolume, volume, duracaoFala, somEspacialVideo, duckVideo, setEnergia } from './audio.js';
 import { amb, setProg, setLuz, updateAmbiente, carregarLogo, girarNucleo, frio, partesFrio, flashLuz } from './ambiente.js';
 import { criarGuia, guia, updateGuia } from './guia.js';
 import { JOGO as J, CONFIG_VERSAO } from './jogo-dados.js';
@@ -103,8 +103,8 @@ function falar(chaves, fim) {
     const k = lista[i];
     const texto = LEGENDA[k] || NARRACAO[k] || '';
     const dur = duracaoFala(k) || Math.max(2, texto.split(/\s+/).length / 2.6);
-    // perguntas e treino já aparecem escritos no painel: sem legenda duplicada sobre as opções e o tabuleiro
-    if (!/^Q\d$/.test(k) && k !== 'treino') mostrarLegenda(texto, dur + 0.3);
+    // perguntas, treino e avisos finais já aparecem escritos no painel: sem legenda duplicada
+    if (!/^Q\d$/.test(k) && !['treino', 'antes_video', 'apos_cta'].includes(k)) mostrarLegenda(texto, dur + 0.3);
     // segue quando a fala termina; se o áudio travar (contexto suspenso), segue pelo tempo estimado
     let feito = false;
     const avancar = () => { if (!feito) { feito = true; proximo(i + 1); } };
@@ -211,7 +211,9 @@ function mostrarFase(f, animar = true) {
   partesFrio.cupula.material.color.set(f === 0 ? 0x9fc3ff : 0xffc08a);
   partesFrio.halo.material.color.set(f === 0 ? 0x9fc3ff : 0xffc08a);
   if (animar && f > 0) { sfx('acender', frio.getWorldPosition(v3)); girarNucleo(); }
-  setHumor(f === 0 ? 'frio' : 'luz', 2.5);
+  // a trilha animada cresce junto com o escritório: uma camada a mais por fase
+  setEnergia(f + 1);
+  setHumor('luz', 2.5);
 }
 function resetarFases() {
   decor.forEach(g => { g.visible = false; });
@@ -793,9 +795,25 @@ async function cta(g) {
     place(p, 0, 1.6, 2.1); gg.add(p); reveal(p, { owner: gg });
     guia.alvo(p);
   });
-  painelFinal();
-  // depois da fala, o vídeo de resultados encerra a experiência; no fim, o aviso volta
-  falar('apos_cta', () => { if (etapa === 'fim' && s) reelFinal(painelFinal); });
+  // 1) avisa que vem um vídeo; 2) o vídeo toca; 3) só então pede para tirar os óculos
+  let comecou = false;
+  const verVideo = () => {
+    if (comecou || etapa !== 'fim' || !s) return;
+    comecou = true;
+    reelFinal(() => { painelFinal(); falar('apos_cta'); });
+  };
+  trocar(gg => {
+    const p = painelTexto(1.9, 0.42, (ctx, W, H) => {
+      cardBg(ctx, W, H, { r: 7, accent: COL.yellow, strong: true });
+      rich(ctx, ok ? J.resultado.antesVideo : `${J.resultado.antesVideo} ${J.resultado.semConexao}`, 14, H / 2, W - 28, 7, { font: F_HEAD, weight: 700, align: 'center', valign: 'middle', lh: 1.2 });
+    });
+    place(p, 0, 1.66, 2.1); gg.add(p); reveal(p, { owner: gg });
+    const b = botao(0.7, 0.16, J.resultado.botaoVideo, verVideo, { primary: true });
+    place(b, 0, 1.25, 2.05); gg.add(b); reveal(b, { delay: 0.5, owner: gg });
+    guia.alvo(b);
+  });
+  // o vídeo começa sozinho depois do aviso (ou na hora, pelo botão)
+  falar('antes_video', () => tw(1.2, () => {}, { ease: E.lin, done: verVideo }));
 }
 
 // Vídeo de resultados da E3 numa tela vertical à frente do jogador.
@@ -966,7 +984,8 @@ function reiniciar() {
 }
 async function entrar() {
   iniciarAudio();
-  setHumor('frio', 2);
+  setEnergia(1);
+  setHumor('luz', 2);
   if (temXR) {
     const modo = (await navigator.xr.isSessionSupported('immersive-ar').catch(() => false)) ? 'immersive-ar' : 'immersive-vr';
     try {

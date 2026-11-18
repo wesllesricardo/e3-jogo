@@ -57,11 +57,13 @@ export const NARRACAO = {
   prio_nenhum: 'manter a execução e acompanhar os indicadores.',
   prova: 'Você viu como cada decisão muda o caminho. Conheça a história de Pablo Oliveira, que alcançou mais de um milhão de reais por mês. Agora, converse com a E três sobre os próximos passos do seu escritório.',
   encerramento: 'Diferente do jogo, na vida real você pode contar com apoio em cada etapa. A E três ajuda a conectar estratégia, marketing, comercial e tecnologia ao momento do seu escritório. Agora, converse com nossa equipe no estande e descubra qual pode ser o seu próximo passo.',
+  antes_video: 'Antes de tirar os óculos, assista a um vídeo rápido com os resultados de quem já está com a E três.',
   apos_cta: 'Sua jornada terminou. Aguarde a ajuda da nossa equipe para retirar os óculos e continuar a conversa.',
   inatividade: 'Pode olhar para os lados com calma e escolher uma opção.',
 };
 // Texto da legenda quando for diferente da fala (números com "R$", "E3").
 export const LEGENDA = {
+  antes_video: 'Antes de tirar os óculos, assista a um vídeo rápido com os resultados de quem já está com a E3.',
   EV2: 'Sua estrutura faz diferença. O canal perdeu desempenho, mas a estratégia construída com a E3 já considerava outras fontes de oportunidades. Você redistribui os esforços e mantém a capacidade de avançar. Avance duas casas.',
   val_0: 'Você chegou a R$ 0/mês no jogo.', val_10: 'Você chegou a R$ 10 mil/mês no jogo.', val_30: 'Você chegou a R$ 30 mil/mês no jogo.',
   val_70: 'Você chegou a R$ 70 mil/mês no jogo.', val_150: 'Você chegou a R$ 150 mil/mês no jogo.', val_300: 'Você chegou a R$ 300 mil/mês no jogo.',
